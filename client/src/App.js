@@ -7,6 +7,7 @@ import SignupPage from './pages/SignupPage';
 import AdminDashboard from './pages/AdminDashboard';
 import EmployeeDashboard from './pages/EmployeeDashboard';
 import ProtectedRoute from './components/routing/ProtectedRoute'; // Import ProtectedRoute
+import MyProfilePage from './pages/MyProfilePage';
 import './App.css';
 
 function App() {
@@ -44,6 +45,8 @@ function App() {
                             : <Navigate to="/login" replace />
                     } 
                 />
+
+                <Route path="/profile" element={<MyProfilePage />} />
             </Routes>
         </div>
     );

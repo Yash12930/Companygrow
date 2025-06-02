@@ -47,6 +47,37 @@ const courseSchema = new mongoose.Schema({
 });
 const Course = mongoose.model('Course', courseSchema);
 
+// Get current user's profile
+app.get('/api/profile/me', authMiddleware, async (req, res) => {
+    try {
+        const user = await User.findById(req.user.id).select('-password');
+        if (!user) return res.status(404).json({ msg: 'User not found' });
+        res.json(user);
+    } catch (err) {
+        res.status(500).send('Server Error');
+    }
+});
+
+// Update current user's profile
+app.put('/api/profile/me', authMiddleware, async (req, res) => {
+    const { name, skills } = req.body;
+    const updates = {};
+    if (name) updates.name = name;
+    if (skills) updates.skills = skills;
+    try {
+        const user = await User.findByIdAndUpdate(
+            req.user.id,
+            { $set: updates },
+            { new: true, runValidators: true }
+        ).select('-password');
+        if (!user) return res.status(404).json({ msg: 'User not found' });
+        res.json(user);
+    } catch (err) {
+        res.status(500).send('Server Error');
+    }
+});
+
+
 app.post('/api/courses/:courseId/enroll', authMiddleware, async (req, res) => {
     try {
         const courseId = req.params.courseId;

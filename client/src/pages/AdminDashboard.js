@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import { Link } from 'react-router-dom';
 
 // Import your existing management components
 import AddEmployeeForm from '../components/AddEmployeeForm'; // Assuming this is for admin to add/manage basic profiles
@@ -91,6 +92,9 @@ function AdminDashboard() {
 
     return (
         <div>
+            <nav>
+                <Link to="/profile">My Profile</Link>
+            </nav>
             <h1>Admin Dashboard</h1>
             <p>Welcome, {user?.name} ({user?.role})!</p>
             <button onClick={handleLogout}>Logout</button>
