@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import CourseList from '../components/CourseList';
+import { Link } from 'react-router-dom';
 
 const predefinedSkills = [
     "JavaScript", "Python", "Java", "SQL", "HTML", "CSS", "React.js", "Node.js",
@@ -133,6 +134,9 @@ function EmployeeDashboard() {
     
     return (
         <div>
+            <nav>
+                <Link to="/profile">My Profile</Link>
+            </nav>
             <h1>Employee Dashboard</h1>
             <p>Welcome, {user?.name}!</p>
             <button onClick={handleLogout}>Logout</button>

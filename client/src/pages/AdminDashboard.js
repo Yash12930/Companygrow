@@ -32,6 +32,9 @@ function AdminDashboard() {
 
     return (
         <div className="admin-dashboard">
+            <nav>
+                <Link to="/profile">My Profile</Link>
+            </nav>
             <h1>Admin Dashboard</h1>
             <p>Welcome, {user?.name} (Admin)!</p>
             
