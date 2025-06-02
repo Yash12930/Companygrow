@@ -3,23 +3,38 @@ import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
 
+// Predefined list of skills
+const predefinedSkills = [
+    "JavaScript", "Python", "Java", "SQL", "HTML", "CSS", "React.js", "Node.js",
+    "Data Analysis", "Project Management", "Communication", "Leadership",
+    "Problem Solving", "Cloud Computing", "Cybersecurity", "DevOps",
+    "Agile Methodologies", "UI/UX Design", "Marketing", "Sales"
+];
+
 function SignupPage() {
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const [skills, setSkills] = useState(''); // Comma-separated
+    const [selectedSkills, setSelectedSkills] = useState([]); // State for selected skills (array of strings)
     const [role, setRole] = useState('employee'); // Default role for signup
     const [error, setError] = useState('');
     const { signup } = useAuth();
     const navigate = useNavigate();
 
+    const handleSkillChange = (skill) => {
+        setSelectedSkills(prevSkills =>
+            prevSkills.includes(skill)
+                ? prevSkills.filter(s => s !== skill) // Deselect if already selected
+                : [...prevSkills, skill] // Select if not selected
+        );
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError('');
-        const skillsArray = skills.split(',').map(s => s.trim()).filter(s => s);
-        const result = await signup(name, email, password, skillsArray, role);
+        // selectedSkills is already an array, no need to split a comma-separated string anymore
+        const result = await signup(name, email, password, selectedSkills, role);
         if (result.success) {
-            // Navigate based on role, or to a general dashboard
             if (result.role === 'admin' || result.role === 'manager') {
                 navigate('/admin/dashboard');
             } else {
@@ -47,10 +62,26 @@ function SignupPage() {
                     <label htmlFor="password">Password:</label>
                     <input type="password" id="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
                 </div>
-                <div>
-                    <label htmlFor="skills">Skills (comma-separated):</label>
-                    <input type="text" id="skills" value={skills} onChange={(e) => setSkills(e.target.value)} />
+                
+                {/* Skills Selection Section */}
+                <div style={{ margin: "10px 0" }}>
+                    <label>Skills:</label>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', border: '1px solid #ccc', padding: '10px' }}>
+                        {predefinedSkills.map(skill => (
+                            <div key={skill} style={{ flexBasis: 'calc(33.33% - 10px)' /* Adjust for layout */}}>
+                                <input
+                                    type="checkbox"
+                                    id={`skill-${skill}`}
+                                    value={skill}
+                                    checked={selectedSkills.includes(skill)}
+                                    onChange={() => handleSkillChange(skill)}
+                                />
+                                <label htmlFor={`skill-${skill}`} style={{ marginLeft: '5px' }}>{skill}</label>
+                            </div>
+                        ))}
+                    </div>
                 </div>
+
                 <div>
                     <label htmlFor="role">Role:</label>
                     <select id="role" value={role} onChange={(e) => setRole(e.target.value)}>

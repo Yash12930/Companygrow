@@ -20,6 +20,9 @@ mongoose.connect(mongoURI, { useNewUrlParser: true, useUnifiedTopology: true })
     .catch(err => console.log(err));
 
 
+// server/server.js
+// ... (mongoose import)
+
 const userSchema = new mongoose.Schema({
     name: { type: String, required: true },
     email: { type: String, required: true, unique: true },
@@ -33,19 +36,52 @@ const userSchema = new mongoose.Schema({
     enrolledCourses: [{ 
         type: mongoose.Schema.Types.ObjectId, 
         ref: 'Course' 
-    }] // Array of strings for skills
+    }],
+    completedCourses: [{ // Add this field
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Course'
+    }]
 });
 const User = mongoose.model('User', userSchema);
+
+// ... (rest of your schemas and code)
+
 
 const courseSchema = new mongoose.Schema({
     title: { type: String, required: true },
     description: { type: String, required: true },
+    tags: [{ type: String }], // Optional tags for categorization
+    difficulty: {
+        type: String,
+        enum: ['Beginner', 'Intermediate', 'Advanced','All Levels'],
+        default: 'All Levels'
+    },
     // For a more advanced system, you might add:
     // instructor: { type: String },
     // duration: { type: String },
     // modules: [{ title: String, content: String }]
 });
 const Course = mongoose.model('Course', courseSchema);
+
+// NEW: Project Schema
+const projectSchema = new mongoose.Schema({
+    title: { type: String, required: true },
+    description: { type: String, required: true },
+    requiredSkills: [{ type: String }], // Skills needed for the project
+    assignedEmployees: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User'
+    }],
+    status: {
+        type: String,
+        enum: ['Not Started', 'In Progress', 'Completed', 'On Hold'],
+        default: 'Not Started'
+    },
+    deadline: { type: Date },
+    // createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' } // Optional: track who created it
+}, { timestamps: true }); // Adds createdAt and updatedAt timestamps
+
+const Project = mongoose.model('Project', projectSchema);
 
 app.post('/api/courses/:courseId/enroll', authMiddleware, async (req, res) => {
     try {
@@ -121,16 +157,16 @@ app.post('/api/courses', authMiddleware, async (req, res) => {
     if (req.user.role !== 'admin' && req.user.role !== 'manager') {
         return res.status(403).json({ msg: 'Access denied: Admin or Manager role required for creating courses.' });
     }
-    // ... rest of your course creation logic
     try {
-        const { title, description } = req.body;
+        const { title, description, tags, difficulty } = req.body; // Add tags and difficulty
         if (!title || !description) {
             return res.status(400).json({ msg: 'Please enter title and description for the course' });
         }
         const newCourse = new Course({
             title,
-            description
-            // createdBy: req.user.id // Optionally track who created the course
+            description,
+            tags: tags || [], // Default to empty array if not provided
+            difficulty: difficulty || 'All Levels' // Default if not provided
         });
         const savedCourse = await newCourse.save();
         res.status(201).json(savedCourse);
@@ -139,6 +175,7 @@ app.post('/api/courses', authMiddleware, async (req, res) => {
         res.status(500).send('Server Error');
     }
 });
+
 
 app.post('/api/courses', async (req, res) => {
     try {
@@ -168,15 +205,46 @@ app.get('/api/users', async (req, res) => {
         res.status(500).send('Server Error');
     }
 });
-app.get('/api/courses', async (req, res) => {
+// server/server.js
+// ...
+
+// API Endpoint: Get all courses (with filtering)
+app.get('/api/courses', async (req, res) => { // No authMiddleware here if courses are public to browse before login, 
+                                           // or add it if login is required to browse.
+                                           // For now, let's assume public browsing.
     try {
-        const courses = await Course.find();
+        const { skills, difficulty, search } = req.query; // Get filter params from query string
+        let query = {};
+
+        if (skills) {
+            // Skills might be a comma-separated string from query params
+            const skillsArray = skills.split(',').map(skill => skill.trim());
+            if (skillsArray.length > 0) {
+                query.tags = { $in: skillsArray }; // Match courses that have AT LEAST ONE of the skills
+            }
+        }
+
+        if (difficulty && difficulty !== 'All' && difficulty !== 'All Levels') { // Allow 'All' to bypass difficulty filter
+            query.difficulty = difficulty;
+        }
+
+        if (search) {
+            // Simple text search in title and description
+            query.$or = [
+                { title: { $regex: search, $options: 'i' } }, // Case-insensitive search
+                { description: { $regex: search, $options: 'i' } }
+            ];
+        }
+
+        const courses = await Course.find(query);
         res.json(courses);
     } catch (err) {
         console.error(err.message);
         res.status(500).send('Server Error');
     }
 });
+
+// ... (rest of your code)
 
 app.listen(port, () => {
     console.log(`Server running on port ${port}`);
@@ -280,5 +348,192 @@ app.post('/api/auth/login', async (req, res) => {
     }
 });
 
-// ... (Your /api/admin/users routes, /api/courses routes)
-// ... (app.listen)
+// server/server.js
+// ... (authMiddleware, User model, Course model)
+// ... (other API endpoints)
+
+// NEW: Endpoint for a user to mark an enrolled course as completed
+app.post('/api/courses/:courseId/complete', authMiddleware, async (req, res) => {
+    try {
+        const courseId = req.params.courseId;
+        const userId = req.user.id;
+
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(404).json({ msg: 'User not found' });
+        }
+
+        // Check if user is enrolled in the course
+        if (!user.enrolledCourses.includes(courseId)) {
+            return res.status(400).json({ msg: 'User is not enrolled in this course. Cannot mark as complete.' });
+        }
+
+        // Check if already completed
+        if (user.completedCourses.includes(courseId)) {
+            return res.status(400).json({ msg: 'Course already marked as completed.' });
+        }
+
+        user.completedCourses.push(courseId);
+        await user.save();
+
+        // Optionally: Trigger badge earning logic here in the future
+        // For now, just confirm completion.
+
+        res.json({ msg: 'Course marked as completed successfully!', completedCourses: user.completedCourses });
+
+    } catch (err) {
+        console.error(err.message);
+        if (err.kind === 'ObjectId') { // Handle invalid courseId format
+            return res.status(400).json({ msg: 'Invalid course ID format.' });
+        }
+        res.status(500).send('Server Error');
+    }
+});
+
+// NEW: Endpoint to get user's completed courses
+app.get('/api/users/me/completed-courses', authMiddleware, async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const user = await User.findById(userId).populate('completedCourses');
+        if (!user) {
+            return res.status(404).json({ msg: 'User not found' });
+        }
+        res.json(user.completedCourses);
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server Error');
+    }
+});
+
+
+// --- Project API Endpoints ---
+
+// POST /api/projects - Create a new project (Admin/Manager only)
+app.post('/api/projects', authMiddleware, async (req, res) => {
+    if (req.user.role !== 'admin' && req.user.role !== 'manager') {
+        return res.status(403).json({ msg: 'Access denied: Admin or Manager role required.' });
+    }
+    try {
+        const { title, description, requiredSkills, deadline } = req.body;
+        if (!title || !description) {
+            return res.status(400).json({ msg: 'Please provide title and description for the project.' });
+        }
+
+        const newProject = new Project({
+            title,
+            description,
+            requiredSkills: requiredSkills || [],
+            deadline,
+            // createdBy: req.user.id // If you add createdBy to schema
+        });
+
+        const savedProject = await newProject.save();
+        res.status(201).json(savedProject);
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server Error');
+    }
+});
+
+// GET /api/projects - Get all projects (Admin/Manager can see all, employees might see a filtered list later)
+app.get('/api/projects', authMiddleware, async (req, res) => {
+    // For now, let's allow all authenticated users to see projects.
+    // You might want to restrict this further or filter based on role later.
+    try {
+        const projects = await Project.find().populate('assignedEmployees', 'name email'); // Populate employee details
+        res.json(projects);
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server Error');
+    }
+});
+
+// GET /api/projects/:projectId - Get a single project by ID
+app.get('/api/projects/:projectId', authMiddleware, async (req, res) => {
+    try {
+        const project = await Project.findById(req.params.projectId).populate('assignedEmployees', 'name email');
+        if (!project) {
+            return res.status(404).json({ msg: 'Project not found' });
+        }
+        res.json(project);
+    } catch (err) {
+        console.error(err.message);
+        if (err.kind === 'ObjectId') {
+            return res.status(404).json({ msg: 'Project not found' });
+        }
+        res.status(500).send('Server Error');
+    }
+});
+
+// PUT /api/projects/:projectId - Update a project (e.g., assign employees, change status) (Admin/Manager only)
+app.put('/api/projects/:projectId', authMiddleware, async (req, res) => {
+    if (req.user.role !== 'admin' && req.user.role !== 'manager') {
+        return res.status(403).json({ msg: 'Access denied: Admin or Manager role required.' });
+    }
+    try {
+        const { title, description, requiredSkills, assignedEmployees, status, deadline } = req.body;
+        const projectFields = {};
+        if (title) projectFields.title = title;
+        if (description) projectFields.description = description;
+        if (requiredSkills) projectFields.requiredSkills = requiredSkills;
+        if (assignedEmployees) projectFields.assignedEmployees = assignedEmployees; // Expecting an array of User IDs
+        if (status) projectFields.status = status;
+        if (deadline) projectFields.deadline = deadline;
+
+        let project = await Project.findById(req.params.projectId);
+        if (!project) {
+            return res.status(404).json({ msg: 'Project not found' });
+        }
+
+        project = await Project.findByIdAndUpdate(
+            req.params.projectId,
+            { $set: projectFields },
+            { new: true }
+        ).populate('assignedEmployees', 'name email');
+
+        res.json(project);
+    } catch (err) {
+        console.error(err.message);
+        if (err.kind === 'ObjectId') {
+            return res.status(404).json({ msg: 'Project not found' });
+        }
+        res.status(500).send('Server Error');
+    }
+});
+
+// DELETE /api/projects/:projectId - Delete a project (Admin/Manager only)
+app.delete('/api/projects/:projectId', authMiddleware, async (req, res) => {
+    if (req.user.role !== 'admin' && req.user.role !== 'manager') {
+        return res.status(403).json({ msg: 'Access denied: Admin or Manager role required.' });
+    }
+    try {
+        const project = await Project.findById(req.params.projectId);
+        if (!project) {
+            return res.status(404).json({ msg: 'Project not found' });
+        }
+
+        await project.deleteOne(); // or project.remove() for older Mongoose versions
+
+        res.json({ msg: 'Project removed' });
+    } catch (err) {
+        console.error(err.message);
+        if (err.kind === 'ObjectId') {
+            return res.status(404).json({ msg: 'Project not found' });
+        }
+        res.status(500).send('Server Error');
+    }
+});
+
+
+// Endpoint for employees to see their assigned projects
+app.get('/api/users/me/projects', authMiddleware, async (req, res) => {
+    try {
+        const projects = await Project.find({ assignedEmployees: req.user.id })
+                                      .populate('assignedEmployees', 'name email');
+        res.json(projects);
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server Error');
+    }
+});
+
