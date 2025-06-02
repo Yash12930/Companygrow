@@ -1,82 +1,141 @@
 // client/src/pages/AdminDashboard.js
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import axios from 'axios';
-
-// Import your existing management components (assuming they exist and are styled or will be)
-// import AddEmployeeForm from '../components/AddEmployeeForm';
-// import EmployeeList from '../components/EmployeeList';
-// import AddCourseForm from '../components/AddCourseForm';
-// import CourseList from '../components/CourseList';
-
-import './AdminDashboard.css'; // Import the CSS file
+import AddCourseForm from '../components/AddCourseForm'; // Your AddCourseForm
+import CourseList from '../components/CourseList';     // Your existing CourseList
+import EmployeeList from '../components/EmployeeList';   // Your existing EmployeeList
+import './AdminDashboard.css'; // Your existing CSS file
 
 function AdminDashboard() {
     const { user, logout } = useAuth();
     const navigate = useNavigate();
 
-    // const [employees, setEmployees] = useState([]);
-    // const [courses, setCourses] = useState([]);
-    // const [isLoadingEmployees, setIsLoadingEmployees] = useState(true);
-    // const [isLoadingCourses, setIsLoadingCourses] = useState(true);
-    const [error, setError] = useState(''); // For general errors on this page
+    const [courses, setCourses] = useState([]);
+    const [users, setUsers] = useState([]);
+    const [isLoadingCourses, setIsLoadingCourses] = useState(true);
+    const [isLoadingUsers, setIsLoadingUsers] = useState(true);
+    const [error, setError] = useState('');
+
+    const fetchCourses = useCallback(async () => {
+        setIsLoadingCourses(true);
+        setError(''); 
+        try {
+            const response = await axios.get('/api/courses'); 
+            setCourses(response.data);
+        } catch (err) {
+            console.error("AdminDashboard: Error fetching courses:", err.response ? err.response.data : err.message);
+            setError(err.response?.data?.msg || 'Failed to fetch courses.');
+        } finally {
+            setIsLoadingCourses(false);
+        }
+    }, []);
+
+    const fetchUsers = useCallback(async () => {
+        setIsLoadingUsers(true);
+        setError(''); 
+        try {
+            const response = await axios.get('/api/users'); 
+            setUsers(response.data);
+        } catch (err) {
+            console.error("AdminDashboard: Error fetching users:", err.response ? err.response.data : err.message);
+            setError(err.response?.data?.msg || 'Failed to fetch users.');
+        } finally {
+            setIsLoadingUsers(false);
+        }
+    }, []);
+
+    useEffect(() => {
+        if (user && (user.role === 'admin' || user.role === 'manager')) {
+            fetchCourses();
+            fetchUsers();
+        }
+    }, [user, fetchCourses, fetchUsers]); // Removed navigate from dependencies as it should be stable
+
+    const handleCourseAdded = (newCourse) => {
+        fetchCourses(); 
+    };
+
+    // Placeholder handlers for Edit/Delete for CourseList and EmployeeList
+    // These would be implemented when you add Edit/Delete features
+    const handleEditCourse = (course) => alert(`Edit course: ${course.title} (Not implemented)`);
+    const handleDeleteCourse = (courseId) => alert(`Delete course ID: ${courseId} (Not implemented)`);
+    const handleEditUser = (employee) => alert(`Edit user: ${employee.name} (Not implemented)`);
+    const handleDeleteUser = (employeeId) => alert(`Delete user ID: ${employeeId} (Not implemented)`);
+
 
     const handleLogout = () => {
         logout();
         navigate('/login');
     };
 
-    // Dummy data/placeholders for sections if not fetching data directly on this page
-    // If these sections are handled by separate pages, this dashboard becomes simpler.
+    if (!user || (user.role !== 'admin' && user.role !== 'manager')) {
+        return <div className="loading-message">Loading dashboard or checking authorization...</div>;
+    }
 
     return (
-        <div className="admin-dashboard">
-            <nav>
-                <Link to="/profile">My Profile</Link>
-            </nav>
-            <h1>Admin Dashboard</h1>
-            <p>Welcome, {user?.name} (Admin)!</p>
-            
-            <nav>
+        <div className="admin-dashboard"> 
+            <nav> 
                 <ul>
-                    <li><Link to="/manage-courses">Manage Courses</Link></li>
-                    <li><Link to="/manage-employees">Manage Employees</Link></li>
-                    <li><Link to="/project-management">Manage Projects</Link></li>
+                    <li><Link to="/profile">My Profile</Link></li>
                 </ul>
+                <button onClick={handleLogout}>Logout</button> 
             </nav>
 
+            <h1>Admin Dashboard</h1>
+            <p className="welcome-message">Welcome, {user.name} ({user.role})!</p>
             {error && <p className="error-message">{error}</p>}
 
-            <div className="dashboard-section">
-                <h2>Quick Overview</h2>
-                <p>This area can show summary statistics or quick actions.</p>
-                {/* Example:
-                <p>Total Users: {employees.length}</p>
-                <p>Total Courses: {courses.length}</p> 
-                */}
-            </div>
+            <section className="dashboard-section">
+                <h2>Manage Courses</h2>
+                <AddCourseForm onCourseAdded={handleCourseAdded} />
+                <div className="list-container" style={{marginTop: '20px'}}>
+                    <h3>Existing Courses</h3>
+                    {isLoadingCourses ? (
+                        <p className="loading-message">Loading courses...</p>
+                    ) : (
+                        <CourseList 
+                            courses={courses} 
+                            // Since this is admin view, don't show employee-specific buttons
+                            showEnrollButton={false} 
+                            showCompleteButton={false}
+                            // Pass placeholder edit/delete handlers for future functionality
+                            // and a prop to indicate it's an admin view if CourseList handles it
+                            // For now, your CourseList doesn't have specific admin action UI
+                            // so these props might not be used by it yet.
+                            onEditCourse={handleEditCourse} // Example
+                            onDeleteCourse={handleDeleteCourse} // Example
+                        />
+                    )}
+                </div>
+            </section>
 
-            {/* 
-                If you prefer to show lists directly on the dashboard instead of linking to separate pages,
-                you would uncomment and integrate the fetching logic and components here.
-                For example:
-            */}
-            {/*
-            <div className="dashboard-section">
-                <h2>Recent Employees</h2>
-                {isLoadingEmployees ? <p className="loading-message">Loading employees...</p> : <EmployeeList employees={employees.slice(0, 5)} />} 
-                <Link to="/manage-employees">View All Employees</Link>
-            </div>
-
-            <div className="dashboard-section">
-                <h2>Recent Courses</h2>
-                {isLoadingCourses ? <p className="loading-message">Loading courses...</p> : <CourseList courses={courses.slice(0, 5)} />}
-                <Link to="/manage-courses">View All Courses</Link>
-            </div>
-            */}
+            <section className="dashboard-section">
+                <h2>Manage Users</h2>
+                <div className="list-container" style={{marginTop: '20px'}}>
+                    <h3>Registered Users</h3>
+                    {isLoadingUsers ? (
+                        <p className="loading-message">Loading users...</p>
+                    ) : (
+                        <EmployeeList 
+                            employees={users} 
+                            // Pass placeholder edit/delete handlers for future functionality
+                            onEditUser={handleEditUser} // Example
+                            onDeleteUser={handleDeleteUser} // Example
+                        />
+                    )}
+                </div>
+            </section>
             
-            <button onClick={handleLogout} style={{ marginTop: '20px' }}>Logout</button>
+            <section className="dashboard-section placeholder-section">
+                <h2>Project Management (Coming Soon)</h2>
+                <p>Assign projects based on skills/training, track progress.</p>
+            </section>
+             <section className="dashboard-section placeholder-section">
+                <h2>Performance Analytics (Coming Soon)</h2>
+                <p>Track training/project metrics and visualize progress.</p>
+            </section>
         </div>
     );
 }

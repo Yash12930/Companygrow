@@ -10,8 +10,7 @@ const authMiddleware = require('./middleware/authMiddleware'); // Import the mid
 // Middleware to parse JSON bodies
 app.use(express.json());
 
-const JWT_SECRET = 'abc'; // IMPORTANT: Use an environment variable for this in production!
-
+const JWT_SECRET = 'abc'; 
 const mongoURI = 'mongodb+srv://arishit:abc@companygroww.4trxhfw.mongodb.net/'; // Change if needed
 
 
@@ -25,7 +24,7 @@ const userSchema = new mongoose.Schema({
     name: { type: String, required: true },
     email: { type: String, required: true, unique: true },
     password: { type: String, required: true },
-    skills: [{ type: String }],
+    skills: [{ type: String, default: 'All Levels'}],
     role: {
         type: String,
         enum: ['employee', 'manager', 'admin'],
@@ -35,7 +34,7 @@ const userSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Course'
     }],
-    completedCourses: [{ // Add this field
+    completedCourses: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Course'
     }]
@@ -45,6 +44,7 @@ const User = mongoose.model('User', userSchema);
 const courseSchema = new mongoose.Schema({
     title: { type: String, required: true },
     description: { type: String, required: true },
+    skills: [{ type: String }],
     tags: [{ type: String }], // Optional tags for categorization
     difficulty: {
         type: String,
