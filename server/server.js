@@ -37,7 +37,8 @@ const userSchema = new mongoose.Schema({
     completedCourses: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Course'
-    }]
+    }],
+    tokens: {type : Number,default:0}
 });
 const User = mongoose.model('User', userSchema);
 
@@ -128,6 +129,7 @@ app.post('/api/courses/:courseId/enroll', authMiddleware, async (req, res) => {
         }
 
         user.enrolledCourses.push(courseId);
+        user.tokens += 10;
         await user.save();
         res.json({ msg: 'Successfully enrolled in course', enrolledCourses: user.enrolledCourses });
     } catch (err) {
