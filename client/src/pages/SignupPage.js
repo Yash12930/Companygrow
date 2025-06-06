@@ -1,100 +1,166 @@
-// client/src/pages/SignupPage.js
+// SignupPage.js
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
+import { FiEye, FiEyeOff } from 'react-icons/fi';
+import './SignupPage.css';
 
-// Predefined list of skills
 const predefinedSkills = [
-    "JavaScript", "Python", "Java", "SQL", "HTML", "CSS", "React.js", "Node.js",
-    "Data Analysis", "Project Management", "Communication", "Leadership",
-    "Problem Solving", "Cloud Computing", "Cybersecurity", "DevOps",
-    "Agile Methodologies", "UI/UX Design", "Marketing", "Sales"
+  "JavaScript", "Python", "Java", "SQL", 
+  "React.js", "Node.js", "Data Analysis", 
+  "Project Management", "UI/UX Design"
 ];
 
 function SignupPage() {
-    const [name, setName] = useState('');
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const [selectedSkills, setSelectedSkills] = useState([]); // State for selected skills (array of strings)
-    const [role, setRole] = useState('employee'); // Default role for signup
-    const [error, setError] = useState('');
-    const { signup } = useAuth();
-    const navigate = useNavigate();
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [selectedSkills, setSelectedSkills] = useState([]);
+  const [role, setRole] = useState('employee');
+  const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState('');
+  const { signup } = useAuth();
+  const navigate = useNavigate();
 
-    const handleSkillChange = (skill) => {
-        setSelectedSkills(prevSkills =>
-            prevSkills.includes(skill)
-                ? prevSkills.filter(s => s !== skill) // Deselect if already selected
-                : [...prevSkills, skill] // Select if not selected
-        );
-    };
-
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        setError('');
-        // selectedSkills is already an array, no need to split a comma-separated string anymore
-        const result = await signup(name, email, password, selectedSkills, role);
-        if (result.success) {
-            if (result.role === 'admin' || result.role === 'manager') {
-                navigate('/admin/dashboard');
-            } else {
-                navigate('/employee/dashboard');
-            }
-        } else {
-            setError(result.message || 'Failed to sign up. Please try again.');
-        }
-    };
-
-    return (
-        <div>
-            <h2>Sign Up</h2>
-            {error && <p style={{ color: 'red' }}>{error}</p>}
-            <form onSubmit={handleSubmit}>
-                <div>
-                    <label htmlFor="name">Name:</label>
-                    <input type="text" id="name" value={name} onChange={(e) => setName(e.target.value)} required />
-                </div>
-                <div>
-                    <label htmlFor="email">Email:</label>
-                    <input type="email" id="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
-                </div>
-                <div>
-                    <label htmlFor="password">Password:</label>
-                    <input type="password" id="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
-                </div>
-                
-                {/* Skills Selection Section */}
-                <div style={{ margin: "10px 0" }}>
-                    <label>Skills:</label>
-                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', border: '1px solid #ccc', padding: '10px' }}>
-                        {predefinedSkills.map(skill => (
-                            <div key={skill} style={{ flexBasis: 'calc(33.33% - 10px)' /* Adjust for layout */}}>
-                                <input
-                                    type="checkbox"
-                                    id={`skill-${skill}`}
-                                    value={skill}
-                                    checked={selectedSkills.includes(skill)}
-                                    onChange={() => handleSkillChange(skill)}
-                                />
-                                <label htmlFor={`skill-${skill}`} style={{ marginLeft: '5px' }}>{skill}</label>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-
-                <div>
-                    <label htmlFor="role">Role:</label>
-                    <select id="role" value={role} onChange={(e) => setRole(e.target.value)}>
-                        <option value="employee">Employee</option>
-                        <option value="manager">Manager</option>
-                        <option value="admin">Admin</option>
-                    </select>
-                </div>
-                <button type="submit">Sign Up</button>
-            </form>
-            <p>Already have an account? <Link to="/login">Login</Link></p>
-        </div>
+  const handleSkillChange = (skill) => {
+    setSelectedSkills(prev => prev.includes(skill) 
+      ? prev.filter(s => s !== skill)
+      : [...prev, skill]
     );
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError('');
+    
+    if (selectedSkills.length < 3) {
+      setError('Please select at least 3 skills');
+      return;
+    }
+
+    const result = await signup(name, email, password, selectedSkills, role);
+    
+    if (result.success) {
+      navigate(result.role === 'admin' ? '/admin/dashboard' : '/employee/dashboard');
+    } else {
+      setError(result.message || 'Registration failed. Please try again.');
+    }
+  };
+
+  return (
+    <div className="signup-container">
+      <div className="signup-card">
+        <div className="signup-header">
+          <h1>Create Account</h1>
+          <p>Start your journey with us</p>
+        </div>
+
+        <form onSubmit={handleSubmit} noValidate>
+          <div className="form-group">
+            <label htmlFor="name">Full Name</label>
+            <input
+              type="text"
+              id="name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              required
+            />
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="email">Email Address</label>
+            <input
+              type="email"
+              id="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+          </div>
+
+          <div className="form-group">
+            <label htmlFor="password">Password</label>
+            <div className="password-input">
+              <input
+                type={showPassword ? 'text' : 'password'}
+                id="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+              />
+              <button
+                type="button"
+                className="password-toggle"
+                onClick={() => setShowPassword(!showPassword)}
+                aria-label={showPassword ? 'Hide password' : 'Show password'}
+              >
+                {showPassword ? <FiEyeOff /> : <FiEye />}
+              </button>
+            </div>
+          </div>
+
+          <div className="form-group">
+            <label>Select Role</label>
+            <div className="role-select">
+              <label>
+                <input
+                  type="radio"
+                  value="employee"
+                  checked={role === 'employee'}
+                  onChange={() => setRole('employee')}
+                />
+                Employee
+              </label>
+              <label>
+                <input
+                  type="radio"
+                  value="manager"
+                  checked={role === 'manager'}
+                  onChange={() => setRole('manager')}
+                />
+                Manager
+              </label>
+              <label>
+                <input
+                  type="radio"
+                  value="admin"
+                  checked={role === 'admin'}
+                  onChange={() => setRole('admin')}
+                />
+                Admin
+              </label>
+            </div>
+          </div>
+
+          <div className="form-group">
+            <label>Skills (Select 3+)</label>
+            <div className="skills-grid">
+              {predefinedSkills.map((skill) => (
+                <label key={skill} className="skill-option">
+                  <input
+                    type="checkbox"
+                    checked={selectedSkills.includes(skill)}
+                    onChange={() => handleSkillChange(skill)}
+                  />
+                  {skill}
+                </label>
+              ))}
+            </div>
+          </div>
+
+          {error && <div className="error-message">{error}</div>}
+
+          <button type="submit" className="signup-button">
+            Create Account
+          </button>
+        </form>
+
+        <div className="signup-footer">
+          <p>Already have an account? <Link to="/login">Login</Link></p>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 export default SignupPage;

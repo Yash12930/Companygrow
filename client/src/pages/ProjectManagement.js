@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import "./ProjectManagement.css";
 
 function ProjectManagement() {
     const [projects, setProjects] = useState([]);
@@ -66,58 +67,111 @@ function ProjectManagement() {
     };
 
     return (
-        <div>
-            <h1>Project Management</h1>
-            <form onSubmit={handleCreateProject} style={{ marginBottom: 20 }}>
-                <input
-                    name="title"
-                    placeholder="Title"
-                    value={form.title}
-                    onChange={handleInputChange}
-                    required
-                />
-                <input
-                    name="description"
-                    placeholder="Description"
-                    value={form.description}
-                    onChange={handleInputChange}
-                    required
-                />
-                <input
-                    name="requiredSkills"
-                    placeholder="Required Skills (comma separated)"
-                    value={form.requiredSkills}
-                    onChange={handleInputChange}
-                />
-                <input
-                    name="deadline"
-                    type="date"
-                    value={form.deadline}
-                    onChange={handleInputChange}
-                />
-                <select multiple value={selectedEmployees} onChange={handleEmployeeSelect}>
-                    {users.map(u => (
-                        <option key={u._id} value={u._id}>{u.name} ({u.email})</option>
-                    ))}
-                </select>
-                <button type="submit">Create Project</button>
-            </form>
-            {error && <p style={{ color: "red" }}>{error}</p>}
-            <h2>All Projects</h2>
-            {loading ? <p>Loading...</p> : (
-                <ul>
-                    {projects.map(p => (
-                        <li key={p._id}>
-                            <b>{p.title}</b> - {p.description} <br />
-                            Skills: {p.requiredSkills.join(", ")} <br />
-                            Deadline: {p.deadline ? new Date(p.deadline).toLocaleDateString() : "N/A"} <br />
-                            Assigned: {p.assignedEmployees.map(e => e.name).join(", ")}
-                        </li>
-                    ))}
-                </ul>
-            )}
-        </div>
-    );
+    <div className="project-container">
+        <h1>🚀 Project Management</h1>
+        
+        <form onSubmit={handleCreateProject}>
+            <input
+                name="title"
+                placeholder="📝 Project Title"
+                value={form.title}
+                onChange={handleInputChange}
+                required
+            />
+            <input
+                name="description"
+                placeholder="📋 Project Description"
+                value={form.description}
+                onChange={handleInputChange}
+                required
+            />
+            <input
+                name="requiredSkills"
+                placeholder="🔧 Required Skills (comma separated)"
+                value={form.requiredSkills}
+                onChange={handleInputChange}
+            />
+            <input
+                name="deadline"
+                type="date"
+                value={form.deadline}
+                onChange={handleInputChange}
+                title="📅 Project Deadline"
+            />
+            <select 
+                multiple 
+                value={selectedEmployees} 
+                onChange={handleEmployeeSelect}
+                title="👥 Select Team Members (Hold Ctrl/Cmd for multiple selection)"
+            >
+                {users.map(u => (
+                    <option key={u._id} value={u._id}>
+                        {u.name} ({u.email})
+                    </option>
+                ))}
+            </select>
+            <button type="submit">✨ Create Project</button>
+        </form>
+
+        {error && <div className="error">⚠️ {error}</div>}
+
+        <h2>📊 All Projects</h2>
+        {loading ? (
+            <div className="loading-message">Loading projects...</div>
+        ) : projects.length === 0 ? (
+            <div style={{
+                background: 'rgba(255, 255, 255, 0.1)',
+                backdropFilter: 'blur(10px)',
+                padding: '3rem 2rem',
+                borderRadius: '20px',
+                textAlign: 'center',
+                color: 'rgba(255, 255, 255, 0.8)',
+                border: '1px solid rgba(255, 255, 255, 0.2)',
+                maxWidth: '600px',
+                margin: '2rem auto'
+            }}>
+                <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>📋</div>
+                <h3 style={{ color: 'white', marginBottom: '0.5rem' }}>No projects found</h3>
+                <p>Create your first project using the form above.</p>
+            </div>
+        ) : (
+            <ul className="project-list">
+                {projects.map(p => (
+                    <li key={p._id}>
+                        <b>🎯 {p.title}</b>
+                        <div className="project-info">
+                            <strong>📝 Description:</strong> {p.description}
+                        </div>
+                        <div className="project-info">
+                            <strong>🔧 Skills:</strong>
+                            <div style={{ marginTop: '0.5rem' }}>
+                                {p.requiredSkills.map((skill, index) => (
+                                    <span key={index} className="skills-tag">{skill}</span>
+                                ))}
+                            </div>
+                        </div>
+                        <div className="project-info">
+                            <strong>📅 Deadline:</strong> {p.deadline ? new Date(p.deadline).toLocaleDateString() : "No deadline set"}
+                        </div>
+                        <div className="project-info">
+                            <strong>👥 Team:</strong>
+                            <div style={{ marginTop: '0.5rem' }}>
+                                {p.assignedEmployees.length > 0 ? (
+                                    p.assignedEmployees.map((employee, index) => (
+                                        <span key={index} className="employee-tag">{employee.name}</span>
+                                    ))
+                                ) : (
+                                    <span style={{ color: '#9ca3af', fontStyle: 'italic' }}>No team members assigned</span>
+                                )}
+                            </div>
+                        </div>
+                    </li>
+                ))}
+            </ul>
+        )}
+    </div>
+);
+
 }
 
 export default ProjectManagement;
