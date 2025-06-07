@@ -196,6 +196,16 @@ npm run build
 4. Push to the branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
 
+## 📝 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🐛 Known Issues
+
+- Course enrollment requires page refresh to see updated enrolled courses list
+- Project deadline notifications are not implemented yet
+- File upload for course materials is pending
+
 ## 🚧 Future Enhancements
 
 - [ ] Real-time notifications
@@ -205,3 +215,11 @@ npm run build
 - [ ] Integration with external learning platforms
 - [ ] Video conferencing integration
 - [ ] Automated skill assessment
+
+## 📞 Support
+
+For support and questions, please create an issue in the GitHub repository or contact the development team.
+
+---
+
+**Built with ❤️ for corporate learning and development**
