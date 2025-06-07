@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { useNavigate, Link } from 'react-router-dom';
 import axios from 'axios';
 import CourseList from '../components/CourseList';
+import './EmployeeDashboard.css';
 
 const predefinedSkills = [
   "JavaScript", "Python", "Java", "SQL", "HTML", "CSS", "React.js", "Node.js",

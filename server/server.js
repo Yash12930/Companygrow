@@ -456,6 +456,112 @@ app.get('/api/users/me/projects', authMiddleware, async (req, res) => {
         res.status(500).send('Server Error');
     }
 });
+// Edit a course (Admin/Manager only)
+app.put('/api/courses/:courseId', authMiddleware, async (req, res) => {
+    if (req.user.role !== 'admin' && req.user.role !== 'manager') {
+        return res.status(403).json({ msg: 'Access denied: Admin or Manager role required.' });
+    }
+    try {
+        const { title, description, tags, difficulty } = req.body;
+        const updates = {};
+        if (title) updates.title = title;
+        if (description) updates.description = description;
+        if (tags) updates.tags = tags;
+        if (difficulty) updates.difficulty = difficulty;
+
+        let course = await Course.findById(req.params.courseId);
+        if (!course) {
+            return res.status(404).json({ msg: 'Course not found' });
+        }
+
+        course = await Course.findByIdAndUpdate(req.params.courseId, { $set: updates }, { new: true, runValidators: true });
+        res.json(course);
+    } catch (err) {
+        console.error(err.message);
+        if (err.kind === 'ObjectId') {
+            return res.status(404).json({ msg: 'Course not found' });
+        }
+        res.status(500).send('Server Error');
+    }
+});
+
+// Delete a course (Admin/Manager only)
+app.delete('/api/courses/:courseId', authMiddleware, async (req, res) => {
+    if (req.user.role !== 'admin' && req.user.role !== 'manager') {
+        return res.status(403).json({ msg: 'Access denied: Admin or Manager role required.' });
+    }
+    try {
+        const course = await Course.findById(req.params.courseId);
+        if (!course) {
+            return res.status(404).json({ msg: 'Course not found' });
+        }
+        await course.deleteOne();
+        res.json({ msg: 'Course deleted successfully' });
+    } catch (err) {
+        console.error(err.message);
+        if (err.kind === 'ObjectId') {
+            return res.status(404).json({ msg: 'Course not found' });
+        }
+        res.status(500).send('Server Error');
+    }
+});
+// Edit a user (Admin/Manager only)
+app.put('/api/users/:userId', authMiddleware, async (req, res) => {
+    if (req.user.role !== 'admin' && req.user.role !== 'manager') {
+        return res.status(403).json({ msg: 'Access denied: Admin or Manager role required.' });
+    }
+    try {
+        const { name, skills, role } = req.body;
+        const updates = {};
+        if (name) updates.name = name;
+        if (skills) updates.skills = skills;
+        if (role) {
+            // Optional: restrict roles allowed to be assigned here if needed
+            updates.role = role;
+        }
+
+        let user = await User.findById(req.params.userId);
+        if (!user) {
+            return res.status(404).json({ msg: 'User not found' });
+        }
+
+        user = await User.findByIdAndUpdate(req.params.userId, { $set: updates }, { new: true, runValidators: true }).select('-password');
+        res.json(user);
+    } catch (err) {
+        console.error(err.message);
+        if (err.kind === 'ObjectId') {
+            return res.status(404).json({ msg: 'User not found' });
+        }
+        res.status(500).send('Server Error');
+    }
+});
+
+// Delete a user (Admin/Manager only)
+app.delete('/api/users/:userId', authMiddleware, async (req, res) => {
+    if (req.user.role !== 'admin' && req.user.role !== 'manager') {
+        return res.status(403).json({ msg: 'Access denied: Admin or Manager role required.' });
+    }
+    try {
+        const user = await User.findById(req.params.userId);
+        if (!user) {
+            return res.status(404).json({ msg: 'User not found' });
+        }
+        await user.deleteOne();
+        res.json({ msg: 'User deleted successfully' });
+    } catch (err) {
+        console.error(err.message);
+        if (err.kind === 'ObjectId') {
+            return res.status(404).json({ msg: 'User not found' });
+        }
+        res.status(500).send('Server Error');
+    }
+});
+
+
+
+
+
+
 
 // Start server
 app.listen(port, () => {

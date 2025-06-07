@@ -1,0 +1,160 @@
+/* CourseList.css */
+
+.course-list-container {
+  width: 100%;
+  max-width: 100%;
+  margin: 0 auto;
+  padding: 0;
+}
+
+.course-item {
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  padding: 16px;
+  margin-bottom: 16px;
+  background-color: #fff;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+  transition: box-shadow 0.2s ease;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.course-item:hover {
+  box-shadow: 0 3px 8px rgba(0,0,0,0.15);
+}
+
+.course-title {
+  font-size: 1.3rem;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: #222;
+}
+
+.course-description {
+  font-size: 1rem;
+  color: #444;
+  margin-bottom: 12px;
+  line-height: 1.4;
+}
+
+.course-tags,
+.course-difficulty {
+  font-size: 0.9rem;
+  color: #555;
+  margin-bottom: 8px;
+}
+
+.course-tags strong,
+.course-difficulty strong {
+  color: #333;
+}
+
+.course-actions {
+  margin-top: 12px;
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.course-actions button {
+  cursor: pointer;
+  padding: 8px 14px;
+  border-radius: 4px;
+  border: none;
+  font-weight: 600;
+  font-size: 0.9rem;
+  transition: background-color 0.2s ease;
+}
+
+.course-actions button.enroll-btn {
+  background-color: #4caf50;
+  color: white;
+}
+
+.course-actions button.enroll-btn:hover {
+  background-color: #45a049;
+}
+
+.course-actions button.complete-btn {
+  background-color: #a0e8a0;
+  color: #205020;
+}
+
+.course-actions button.complete-btn:hover {
+  background-color: #8cd98c;
+}
+
+.course-actions button.edit-btn {
+  background-color: #ffdd57;
+  color: #666;
+}
+
+.course-actions button.edit-btn:hover {
+  background-color: #f9d842;
+}
+
+.course-actions button.delete-btn {
+  background-color: #f76c6c;
+  color: white;
+}
+
+.course-actions button.delete-btn:hover {
+  background-color: #e55555;
+}
+
+.status-message {
+  font-style: italic;
+  font-weight: 600;
+  color: #3a7d44; /* green for enrolled */
+}
+
+.status-message.completed {
+  color: #1a57a1; /* blue for completed */
+}
+
+/* Edit form styles */
+.course-edit-form input,
+.course-edit-form textarea,
+.course-edit-form select {
+  width: 100%;
+  padding: 8px 10px;
+  font-size: 1rem;
+  margin-bottom: 10px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-family: inherit;
+  resize: vertical;
+}
+
+.course-edit-form textarea {
+  min-height: 60px;
+}
+
+.course-edit-form button {
+  padding: 8px 14px;
+  margin-right: 8px;
+  border-radius: 4px;
+  border: none;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+.course-edit-form button.save-btn {
+  background-color: #4caf50;
+  color: white;
+}
+
+.course-edit-form button.cancel-btn {
+  background-color: #777;
+  color: white;
+}
+
+/* Responsive tweaks */
+@media (max-width: 600px) {
+  .course-actions {
+    flex-direction: column;
+  }
+  .course-actions button {
+    width: 100%;
+  }
+}
