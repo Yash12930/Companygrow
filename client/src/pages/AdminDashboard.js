@@ -11,7 +11,7 @@ import './AdminDashboard.css'; // Your existing CSS file
 function AdminDashboard() {
     const { user, logout } = useAuth();
     const navigate = useNavigate();
-
+    const [selectedCourseId, setSelectedCourseId] = useState("");
     const [courses, setCourses] = useState([]);
     const [users, setUsers] = useState([]);
     const [isLoadingCourses, setIsLoadingCourses] = useState(true);
@@ -75,69 +75,82 @@ function AdminDashboard() {
     }
 
     return (
-        <div className="admin-dashboard"> 
-            <nav> 
-                <ul>
-                    <li><Link to="/profile">My Profile</Link></li>
-                </ul>
-                <button onClick={handleLogout}>Logout</button> 
-            </nav>
+    <div className="admin-dashboard"> 
+        <nav> 
+            <ul>
+                <li><Link to="/profile">My Profile</Link></li>
+            </ul>
+            <button onClick={handleLogout}>Logout</button> 
+        </nav>
 
-            <h1>Admin Dashboard</h1>
-            <p className="welcome-message">Welcome, {user.name} ({user.role})!</p>
-            {error && <p className="error-message">{error}</p>}
+        <h1>Admin Dashboard</h1>
+        <p className="welcome-message">Welcome, {user.name} ({user.role})!</p>
+        {error && <p className="error-message">{error}</p>}
 
-            <section className="dashboard-section">
-                <h2>Manage Courses</h2>
-                <AddCourseForm onCourseAdded={handleCourseAdded} />
-                <div className="list-container" style={{marginTop: '20px'}}>
-                    <h3>Existing Courses</h3>
-                    {isLoadingCourses ? (
-                        <p className="loading-message">Loading courses...</p>
-                    ) : (
-                        <CourseList 
-                            courses={courses} 
-                            // Since this is admin view, don't show employee-specific buttons
-                            showEnrollButton={false} 
-                            showCompleteButton={false}
-                            // Pass placeholder edit/delete handlers for future functionality
-                            // and a prop to indicate it's an admin view if CourseList handles it
-                            // For now, your CourseList doesn't have specific admin action UI
-                            // so these props might not be used by it yet.
-                            onEditCourse={handleEditCourse} // Example
-                            onDeleteCourse={handleDeleteCourse} // Example
-                        />
-                    )}
-                </div>
-            </section>
-
-            <section className="dashboard-section">
-                <h2>Manage Users</h2>
-                <div className="list-container" style={{marginTop: '20px'}}>
-                    <h3>Registered Users</h3>
-                    {isLoadingUsers ? (
-                        <p className="loading-message">Loading users...</p>
-                    ) : (
-                        <EmployeeList 
-                            employees={users} 
-                            // Pass placeholder edit/delete handlers for future functionality
-                            onEditUser={handleEditUser} // Example
-                            onDeleteUser={handleDeleteUser} // Example
-                        />
-                    )}
-                </div>
-            </section>
-            
-            <section className="dashboard-section placeholder-section">
-                <h2>Project Management (Coming Soon)</h2>
-                <p>Assign projects based on skills/training, track progress.</p>
-            </section>
-             <section className="dashboard-section placeholder-section">
-                <h2>Performance Analytics (Coming Soon)</h2>
-                <p>Track training/project metrics and visualize progress.</p>
-            </section>
+        <section className="dashboard-section">
+            <h2>Manage Courses</h2>
+            <AddCourseForm onCourseAdded={handleCourseAdded} />
+            <div className="dropdown-container">
+                <label htmlFor="courseDropdown"><strong>Select a Course:</strong></label>
+                <select
+                    id="courseDropdown"
+                    value={selectedCourseId}
+                    onChange={(e) => setSelectedCourseId(e.target.value)}
+                >
+                    <option value="">-- Select a Course --</option>
+                    {courses.map(course => (
+                        <option key={course._id} value={course._id}>
+                            {course.title}
+                        </option>
+                    ))}
+                </select>
+            </div>
+        </section>
+        {selectedCourseId && (
+        <div className="course-details">
+            {(() => {
+                const selectedCourse = courses.find(c => c._id === selectedCourseId);
+                return selectedCourse ? (
+                    <>
+                        <h4>{selectedCourse.title}</h4>
+                        <p><strong>Description:</strong> {selectedCourse.description}</p>
+                        <p><strong>Instructor:</strong> {selectedCourse.instructor?.name || "N/A"}</p>
+                        <p><strong>Enrolled Users:</strong> {selectedCourse.enrolledUsers?.length || 0}</p>
+                    </>
+                ) : <p>Course not found.</p>;
+            })()}
         </div>
-    );
+    )}
+        <section className="dashboard-section">
+            <h2>Manage Users</h2>
+            {isLoadingUsers ? (
+                <p className="loading-message">Loading users...</p>
+            ) : (
+                <div className="employee-grid">
+                    {users.map((employee) => (
+                        <div key={employee._id} className="employee-card">
+                            <h4>{employee.name}</h4>
+                            <p><strong>Email:</strong> {employee.email}</p>
+                            <p><strong>Role:</strong> {employee.role}</p>
+                        </div>
+                    ))}
+                </div>
+            )}
+        </section>
+
+        <section className="dashboard-section placeholder-section">
+            <h2>Project Management (Coming Soon)</h2>
+            <p>Assign projects based on skills/training, track progress.</p>
+        </section>
+
+        <section className="dashboard-section placeholder-section">
+            <h2>Performance Analytics (Coming Soon)</h2>
+            <p>Track training/project metrics and visualize progress.</p>
+        </section>
+    </div>
+);
+
+
 }
 
 export default AdminDashboard;

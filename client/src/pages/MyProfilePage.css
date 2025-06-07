@@ -1,0 +1,440 @@
+/* MyProfilePage.css */
+
+/* Container and Layout */
+.profile-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #f8fafc;
+  min-height: 100vh;
+}
+
+/* Header */
+.profile-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid #e2e8f0;
+}
+
+.profile-title {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #1a202c;
+  margin: 0;
+}
+
+.logout-btn {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.logout-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Loading and Error States */
+.loading-message, .error-message, .no-data-message {
+  text-align: center;
+  padding: 2rem;
+  font-size: 1.2rem;
+}
+
+.error-message {
+  color: #e53e3e;
+  background-color: #fed7d7;
+  border: 1px solid #feb2b2;
+  border-radius: 8px;
+}
+
+/* Section Styling */
+.profile-section {
+  background: white;
+  border-radius: 12px;
+  padding: 2rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  border: 1px solid #e2e8f0;
+}
+
+.section-title {
+  font-size: 1.8rem;
+  font-weight: 600;
+  color: #2d3748;
+  margin-bottom: 1.5rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid #4299e1;
+}
+
+/* Basic Info Display */
+.info-display {
+  display: grid;
+  gap: 1rem;
+}
+
+.info-item {
+  display: flex;
+  align-items: center;
+  padding: 0.75rem 0;
+}
+
+.info-label {
+  font-weight: 600;
+  color: #4a5568;
+  min-width: 120px;
+  margin-right: 1rem;
+}
+
+.info-value {
+  color: #2d3748;
+  flex: 1;
+}
+
+.skills-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.skill-tag {
+  background: linear-gradient(135deg, #4299e1 0%, #3182ce 100%);
+  color: white;
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+/* Buttons */
+.btn {
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-right: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #4299e1 0%, #3182ce 100%);
+  color: white;
+  box-shadow: 0 4px 6px rgba(66, 153, 225, 0.3);
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(66, 153, 225, 0.4);
+}
+
+.btn-success {
+  background: linear-gradient(135deg, #38a169 0%, #2f855a 100%);
+  color: white;
+  box-shadow: 0 4px 6px rgba(56, 161, 105, 0.3);
+}
+
+.btn-success:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(56, 161, 105, 0.4);
+}
+
+.btn-danger {
+  background: linear-gradient(135deg, #e53e3e 0%, #c53030 100%);
+  color: white;
+  box-shadow: 0 4px 6px rgba(229, 62, 62, 0.3);
+}
+
+.btn-danger:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(229, 62, 62, 0.4);
+}
+
+.btn-secondary {
+  background: #e2e8f0;
+  color: #4a5568;
+  border: 1px solid #cbd5e0;
+}
+
+.btn-secondary:hover {
+  background: #cbd5e0;
+  transform: translateY(-1px);
+}
+
+/* Form Styling */
+.edit-form {
+  background: #f7fafc;
+  border: 2px solid #4299e1;
+  border-radius: 12px;
+  padding: 2rem;
+  margin: 1rem 0;
+}
+
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+.form-label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+  color: #4a5568;
+}
+
+.form-input {
+  width: 100%;
+  padding: 0.75rem;
+  border: 2px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 1rem;
+  transition: border-color 0.3s ease;
+  background: white;
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: #4299e1;
+  box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.1);
+}
+
+.form-textarea {
+  width: 100%;
+  padding: 0.75rem;
+  border: 2px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 1rem;
+  min-height: 120px;
+  resize: vertical;
+  font-family: inherit;
+  transition: border-color 0.3s ease;
+  background: white;
+}
+
+.form-textarea:focus {
+  outline: none;
+  border-color: #4299e1;
+  box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.1);
+}
+
+/* Skills Checkbox Grid */
+.skills-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+  background: white;
+  border: 2px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin-top: 0.5rem;
+}
+
+.skill-checkbox-item {
+  display: flex;
+  align-items: center;
+  padding: 0.5rem;
+  border-radius: 6px;
+  transition: background-color 0.2s ease;
+}
+
+.skill-checkbox-item:hover {
+  background-color: #f7fafc;
+}
+
+.skill-checkbox {
+  margin-right: 0.75rem;
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+}
+
+.skill-checkbox-label {
+  cursor: pointer;
+  font-weight: 500;
+  color: #4a5568;
+}
+
+/* Experience Items */
+.experience-item {
+  background: white;
+  border: 2px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin: 1rem 0;
+  transition: all 0.3s ease;
+}
+
+.experience-item:hover {
+  border-color: #4299e1;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.experience-title {
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: #2d3748;
+  margin-bottom: 0.5rem;
+}
+
+.experience-duration {
+  color: #718096;
+  font-weight: 500;
+  margin-bottom: 1rem;
+}
+
+.experience-description {
+  color: #4a5568;
+  line-height: 1.6;
+  margin-bottom: 1rem;
+}
+
+.experience-actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+/* Experience Form */
+.experience-form {
+  background: linear-gradient(135deg, #f0fff4 0%, #e6fffa 100%);
+  border: 2px solid #38a169;
+  border-radius: 12px;
+  padding: 2rem;
+  margin: 1rem 0;
+}
+
+.experience-form-title {
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: #2f855a;
+  margin-bottom: 1.5rem;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.form-actions {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-top: 1.5rem;
+}
+
+/* No Data States */
+.no-experience {
+  text-align: center;
+  padding: 2rem;
+  color: #718096;
+  font-style: italic;
+}
+
+.training-placeholder {
+  text-align: center;
+  padding: 2rem;
+  color: #718096;
+  background: linear-gradient(135deg, #fef5e7 0%, #fed7aa 100%);
+  border-radius: 8px;
+  border: 2px dashed #f6ad55;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .profile-container {
+    padding: 1rem;
+  }
+  
+  .profile-header {
+    flex-direction: column;
+    gap: 1rem;
+    text-align: center;
+  }
+  
+  .profile-title {
+    font-size: 2rem;
+  }
+  
+  .profile-section {
+    padding: 1.5rem;
+  }
+  
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+  
+  .skills-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .experience-actions {
+    justify-content: center;
+  }
+  
+  .form-actions {
+    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .profile-container {
+    padding: 0.5rem;
+  }
+  
+  .profile-section {
+    padding: 1rem;
+  }
+  
+  .btn {
+    width: 100%;
+    margin-right: 0;
+    margin-bottom: 0.5rem;
+  }
+  
+  .experience-actions .btn {
+    width: auto;
+    flex: 1;
+  }
+  
+  .form-actions .btn {
+    width: auto;
+    flex: 1;
+  }
+}
+
+/* Animation for smooth transitions */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.profile-section {
+  animation: fadeIn 0.6s ease-out;
+}
+
+/* Focus styles for accessibility */
+.btn:focus, .form-input:focus, .form-textarea:focus, .skill-checkbox:focus {
+  outline: 2px solid #4299e1;
+  outline-offset: 2px;
+}
