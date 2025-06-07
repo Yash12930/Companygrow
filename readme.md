@@ -183,7 +183,7 @@ npm start
 ```bash
 # Build client
 cd client
-npm start
+npm run build
 
 # The build folder will contain the production-ready files
 ```
