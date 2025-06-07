@@ -225,14 +225,14 @@ function AdminDashboard() {
                                 <div className="course-details">
                                     {editingCourseId === selectedCourse._id ? (
                                         // Edit Form
-                                        <form onSubmit={handleEditFormSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                                        <form onSubmit={handleEditFormSubmit}> {/* Removed inline style */}
                                             <input
                                                 name="title"
                                                 value={editFormData.title}
                                                 onChange={handleEditFormChange}
                                                 placeholder="Course Title"
                                                 required
-                                                style={{ padding: '8px', fontSize: '1rem', borderRadius: '4px', border: '1px solid #ccc' }}
+                                                // Removed inline style
                                             />
                                             <textarea
                                                 name="description"
@@ -240,13 +240,13 @@ function AdminDashboard() {
                                                 onChange={handleEditFormChange}
                                                 placeholder="Description"
                                                 rows={3}
-                                                style={{ padding: '8px', fontSize: '1rem', borderRadius: '4px', border: '1px solid #ccc' }}
+                                                // Removed inline style
                                             />
                                             <select
                                                 name="difficulty"
                                                 value={editFormData.difficulty}
                                                 onChange={handleEditFormChange}
-                                                style={{ padding: '8px', fontSize: '1rem', borderRadius: '4px', border: '1px solid #ccc' }}
+                                                // Removed inline style
                                             >
                                                 <option value="">Select Difficulty</option>
                                                 <option value="Beginner">Beginner</option>
@@ -259,19 +259,19 @@ function AdminDashboard() {
                                                 value={editFormData.tags}
                                                 onChange={handleEditFormChange}
                                                 placeholder="Tags (comma separated)"
-                                                style={{ padding: '8px', fontSize: '1rem', borderRadius: '4px', border: '1px solid #ccc' }}
+                                                // Removed inline style
                                             />
                                             <div>
                                                 <button
                                                     type="submit"
-                                                    style={{ padding: '8px 14px', backgroundColor: '#4caf50', color: 'white', border: 'none', borderRadius: '4px', marginRight: '8px' }}
+                                                    style={{ backgroundColor: '#4caf50' }} // Keep inline style for dynamic background color, relies on CSS for other properties
                                                 >
                                                     Save Changes
                                                 </button>
                                                 <button
                                                     type="button"
                                                     onClick={cancelEditCourse}
-                                                    style={{ padding: '8px 14px', backgroundColor: '#777', color: 'white', border: 'none', borderRadius: '4px' }}
+                                                    style={{ backgroundColor: '#777', marginLeft: '8px' }} // Keep inline style for dynamic background color, relies on CSS for other properties
                                                 >
                                                     Cancel
                                                 </button>
@@ -285,8 +285,8 @@ function AdminDashboard() {
                                             <p><strong>Difficulty:</strong> {selectedCourse.difficulty || "N/A"}</p>
                                             <p><strong>Tags:</strong> {selectedCourse.tags ? selectedCourse.tags.join(', ') : "N/A"}</p>
                                             <p><strong>Created:</strong> {new Date(selectedCourse.createdAt || Date.now()).toLocaleDateString()}</p>
-                                            <button onClick={() => startEditCourse(selectedCourse)} style={{ marginRight: '10px', backgroundColor: '#ffdd57', padding: '8px 14px', border: 'none', borderRadius: '4px' }}>Edit</button>
-                                            <button onClick={() => handleDeleteCourse(selectedCourse._id)} style={{ backgroundColor: '#f76c6c', color: 'white', padding: '8px 14px', border: 'none', borderRadius: '4px' }}>Delete</button>
+                                            <button onClick={() => startEditCourse(selectedCourse)} style={{ backgroundColor: '#ffdd57' }}>Edit</button> {/* Keep inline style for dynamic background color */}
+                                            <button onClick={() => handleDeleteCourse(selectedCourse._id)} style={{ backgroundColor: '#f76c6c', marginLeft: '10px' }}>Delete</button> {/* Keep inline style for dynamic background color */}
                                         </>
                                     )}
                                 </div>
