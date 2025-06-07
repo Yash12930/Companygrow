@@ -128,13 +128,23 @@ app.post('/api/courses/:courseId/enroll', authMiddleware, async (req, res) => {
             return res.status(400).json({ msg: 'User already enrolled in this course' });
         }
 
-        user.enrolledCourses.push(courseId);
-        user.tokens += 10;
-        await user.save();
-        res.json({ msg: 'Successfully enrolled in course', enrolledCourses: user.enrolledCourses });
+        // Use findByIdAndUpdate to avoid versioning conflicts
+        const updatedUser = await User.findByIdAndUpdate(
+            userId,
+            { 
+                $push: { enrolledCourses: courseId },
+                $inc: { tokens: 10 }
+            },
+            { new: true, runValidators: true }
+        );
+
+        res.json({ 
+            msg: 'Successfully enrolled in course', 
+            enrolledCourses: updatedUser.enrolledCourses 
+        });
     } catch (err) {
-        console.error(err.message);
-        res.status(500).send('Server Error');
+        console.error('Enrollment error:', err.message);
+        res.status(500).json({ msg: 'Server Error during enrollment' });
     }
 });
 

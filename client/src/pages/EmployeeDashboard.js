@@ -52,9 +52,13 @@ function EmployeeDashboard() {
   const fetchMyEnrolledCourses = async () => {
     setLoadingMyCourses(true);
     try {
-      const response = await axios.get('/api/users/me/enrolled-courses');
+      const token = localStorage.getItem('token');
+      const response = await axios.get('/api/users/me/enrolled-courses', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
       setMyEnrolledCourses(response.data);
-      setMyEnrolledCourseIds(response.data.map(enrollment => enrollment.course._id)); // Corrected this line
+      // Fix: Server returns course objects directly, not enrollment.course
+      setMyEnrolledCourseIds(response.data.map(course => course._id));
     } catch (error) {
       console.error("Failed to fetch my enrolled courses", error);
     } finally {
@@ -65,9 +69,13 @@ function EmployeeDashboard() {
   const fetchMyCompletedCourses = async () => {
     setLoadingMyCompleted(true);
     try {
-      const response = await axios.get('/api/users/me/completed-courses');
+      const token = localStorage.getItem('token');
+      const response = await axios.get('/api/users/me/completed-courses', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
       setMyCompletedCourses(response.data);
-      setMyCompletedCourseIds(response.data.map(enrollment => enrollment.course._id)); // Corrected this line
+      // Fix: Server returns course objects directly, not enrollment.course
+      setMyCompletedCourseIds(response.data.map(course => course._id));
     } catch (error) {
       console.error("Failed to fetch my completed courses", error);
     } finally {
@@ -113,9 +121,14 @@ function EmployeeDashboard() {
     setSearchTerm('');
   };
 
-  const handleCourseEnrolled = (enrolledCourseId) => {
-    fetchMyEnrolledCourses();
-    fetchMyCompletedCourses();
+  const handleCourseEnrolled = async (enrolledCourseId) => {
+    setMyEnrolledCourseIds(prev => [...prev, enrolledCourseId]);
+    try {
+      await fetchMyEnrolledCourses();
+      await fetchMyCompletedCourses();
+    } catch (error) {
+      console.error('Error refreshing data after enrollment:', error);
+    }
   };
 
   const handleCourseCompleted = (completedCourseId) => {
@@ -198,11 +211,12 @@ function EmployeeDashboard() {
         {loadingMyCourses ? <p className="loading-message">Loading your courses...</p> :
           myEnrolledCourses.length > 0 ?
             <CourseList
-              courses={myEnrolledCourses.map(enrollment => enrollment.course)}
+              courses={myEnrolledCourses} // Remove .map(enrollment => enrollment.course)
               showEnrollButton={false}
+              showCompleteButton={true}
               onCompleted={handleCourseCompleted}
               completedCourseIds={myCompletedCourseIds}
-              enrolledCourseIds={myEnrolledCourseIds} // Pass the IDs directly
+              enrolledCourseIds={myEnrolledCourseIds}
             /> :
             <p>You are not enrolled in any courses yet.</p>
         }
@@ -229,9 +243,9 @@ function EmployeeDashboard() {
         {loadingMyCompleted ? <p className="loading-message">Loading completed courses...</p> :
           myCompletedCourses.length > 0 ?
             <CourseList
-              courses={myCompletedCourses.map(enrollment => enrollment.course)}
+              courses={myCompletedCourses} // Remove .map(enrollment => enrollment.course)
               showEnrollButton={false}
-              showCompleteButton={false} // Assuming CourseList has this prop
+              showCompleteButton={false}
               completedCourseIds={myCompletedCourseIds}
             /> :
             <p>You have not completed any courses yet.</p>

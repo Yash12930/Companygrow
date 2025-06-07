@@ -65,7 +65,16 @@ function CourseList({
 
   const handleEnroll = async (courseId) => {
     try {
-      const response = await axios.post(`/api/courses/${courseId}/enroll`);
+      const token = localStorage.getItem('token');
+      if (!token) {
+        alert('Please log in to enroll in courses');
+        return;
+      }
+      
+      const response = await axios.post(`/api/courses/${courseId}/enroll`, {}, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      
       alert(response.data.msg || 'Successfully enrolled!');
       if (onEnrolled) onEnrolled(courseId);
     } catch (error) {
@@ -76,7 +85,10 @@ function CourseList({
 
   const handleComplete = async (courseId) => {
     try {
-      const response = await axios.post(`/api/courses/${courseId}/complete`);
+      const token = localStorage.getItem('token');
+      const response = await axios.post(`/api/courses/${courseId}/complete`, {}, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
       alert(response.data.msg || 'Course marked as complete!');
       if (onCompleted) onCompleted(courseId);
     } catch (error) {

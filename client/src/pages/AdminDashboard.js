@@ -1,4 +1,3 @@
-// // client/src/pages/AdminDashboard.js
 import React, { useState, useEffect, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
@@ -17,13 +16,23 @@ function AdminDashboard() {
     const [isLoadingCourses, setIsLoadingCourses] = useState(true);
     const [isLoadingUsers, setIsLoadingUsers] = useState(true);
     const [error, setError] = useState('');
+    const [editingCourseId, setEditingCourseId] = useState(null);
+    const [editFormData, setEditFormData] = useState({
+        title: '',
+        description: '',
+        tags: '',
+        difficulty: ''
+    });
 
     // Fetch Courses
     const fetchCourses = useCallback(async () => {
         setIsLoadingCourses(true);
         setError('');
         try {
-            const response = await axios.get('/api/courses');
+            const token = localStorage.getItem('token');
+            const response = await axios.get('/api/courses', {
+                headers: { Authorization: `Bearer ${token}` }
+            });
             setCourses(response.data);
         } catch (err) {
             console.error("AdminDashboard: Error fetching courses:", err);
@@ -38,7 +47,10 @@ function AdminDashboard() {
         setIsLoadingUsers(true);
         setError('');
         try {
-            const response = await axios.get('/api/users');
+            const token = localStorage.getItem('token');
+            const response = await axios.get('/api/users', {
+                headers: { Authorization: `Bearer ${token}` }
+            });
             setUsers(response.data);
         } catch (err) {
             console.error("AdminDashboard: Error fetching users:", err);
@@ -58,11 +70,49 @@ function AdminDashboard() {
     // Handlers
     const handleCourseAdded = () => fetchCourses();
 
-    const handleEditCourse = async (updatedCourse) => {
+    const startEditCourse = (course) => {
+        setEditingCourseId(course._id);
+        setEditFormData({
+            title: course.title || '',
+            description: course.description || '',
+            tags: course.tags ? course.tags.join(', ') : '',
+            difficulty: course.difficulty || ''
+        });
+    };
+
+    const cancelEditCourse = () => {
+        setEditingCourseId(null);
+        setEditFormData({ title: '', description: '', tags: '', difficulty: '' });
+    };
+
+    const handleEditFormChange = (e) => {
+        const { name, value } = e.target;
+        setEditFormData(prev => ({ ...prev, [name]: value }));
+    };
+
+    const handleEditFormSubmit = async (e) => {
+        e.preventDefault();
+        if (!editFormData.title.trim()) {
+            alert('Title is required.');
+            return;
+        }
+        
         try {
-            await axios.put(`/api/courses/${updatedCourse._id}`, updatedCourse);
+            const token = localStorage.getItem('token');
+            const updatedCourse = {
+                title: editFormData.title.trim(),
+                description: editFormData.description.trim(),
+                difficulty: editFormData.difficulty.trim(),
+                tags: editFormData.tags.split(',').map(tag => tag.trim()).filter(tag => tag !== '')
+            };
+            
+            // Fixed: Use courseId instead of id to match server endpoint
+            await axios.put(`/api/courses/${editingCourseId}`, updatedCourse, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
             alert('Course updated successfully!');
             fetchCourses();
+            cancelEditCourse();
         } catch (error) {
             console.error("Error updating course:", error);
             alert(error.response?.data?.msg || 'Failed to update course.');
@@ -72,9 +122,13 @@ function AdminDashboard() {
     const handleDeleteCourse = async (courseId) => {
         if (!window.confirm("Are you sure you want to delete this course?")) return;
         try {
-            await axios.delete(`/api/courses/${courseId}`);
+            const token = localStorage.getItem('token');
+            await axios.delete(`/api/courses/${courseId}`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
             alert('Course deleted successfully!');
             fetchCourses();
+            setSelectedCourseId(""); // Reset selection after deletion
         } catch (error) {
             console.error("Error deleting course:", error);
             alert(error.response?.data?.msg || 'Failed to delete course.');
@@ -82,27 +136,31 @@ function AdminDashboard() {
     };
 
     const handleEditUser = async (updatedUser) => {
-    try {
-        const payload = {
-            name: updatedUser.name,
-            skills: updatedUser.skills,
-            role: updatedUser.role,
-        };
-        await axios.put(`/api/users/${updatedUser._id}`, payload);
-        alert('User updated successfully!');
-        fetchUsers();
-    } catch (error) {
-        console.error("Error updating user:", error);
-        alert(error.response?.data?.msg || 'Failed to update user.');
-    }
-};
-
-
+        try {
+            const token = localStorage.getItem('token');
+            const payload = {
+                name: updatedUser.name,
+                skills: updatedUser.skills,
+                role: updatedUser.role,
+            };
+            await axios.put(`/api/users/${updatedUser._id}`, payload, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            alert('User updated successfully!');
+            fetchUsers();
+        } catch (error) {
+            console.error("Error updating user:", error);
+            alert(error.response?.data?.msg || 'Failed to update user.');
+        }
+    };
 
     const handleDeleteUser = async (employeeId) => {
         if (!window.confirm("Are you sure you want to delete this user?")) return;
         try {
-            await axios.delete(`/api/users/${employeeId}`);
+            const token = localStorage.getItem('token');
+            await axios.delete(`/api/users/${employeeId}`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
             alert('User deleted successfully!');
             fetchUsers();
         } catch (error) {
@@ -149,11 +207,15 @@ function AdminDashboard() {
                                 onChange={(e) => setSelectedCourseId(e.target.value)}
                             >
                                 <option value="">-- Select a Course --</option>
-                                {courses.map(course => (
-                                    <option key={course._id} value={course._id}>
-                                        {course.title}
-                                    </option>
-                                ))}
+                                {courses && courses.length > 0 ? (
+                                    courses.map(course => (
+                                        <option key={course._id} value={course._id}>
+                                            {course.title}
+                                        </option>
+                                    ))
+                                ) : (
+                                    <option value="" disabled>No courses available</option>
+                                )}
                             </select>
                         </div>
 
@@ -161,12 +223,72 @@ function AdminDashboard() {
                             const selectedCourse = courses.find(c => c._id === selectedCourseId);
                             return selectedCourse ? (
                                 <div className="course-details">
-                                    <h4>{selectedCourse.title}</h4>
-                                    <p><strong>Description:</strong> {selectedCourse.description}</p>
-                                    <p><strong>Instructor:</strong> {selectedCourse.instructor?.name || "N/A"}</p>
-                                    <p><strong>Enrolled Users:</strong> {selectedCourse.enrolledUsers?.length || 0}</p>
-                                    <button onClick={() => handleEditCourse(selectedCourse)}>Edit</button>
-                                    <button onClick={() => handleDeleteCourse(selectedCourse._id)}>Delete</button>
+                                    {editingCourseId === selectedCourse._id ? (
+                                        // Edit Form
+                                        <form onSubmit={handleEditFormSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                                            <input
+                                                name="title"
+                                                value={editFormData.title}
+                                                onChange={handleEditFormChange}
+                                                placeholder="Course Title"
+                                                required
+                                                style={{ padding: '8px', fontSize: '1rem', borderRadius: '4px', border: '1px solid #ccc' }}
+                                            />
+                                            <textarea
+                                                name="description"
+                                                value={editFormData.description}
+                                                onChange={handleEditFormChange}
+                                                placeholder="Description"
+                                                rows={3}
+                                                style={{ padding: '8px', fontSize: '1rem', borderRadius: '4px', border: '1px solid #ccc' }}
+                                            />
+                                            <select
+                                                name="difficulty"
+                                                value={editFormData.difficulty}
+                                                onChange={handleEditFormChange}
+                                                style={{ padding: '8px', fontSize: '1rem', borderRadius: '4px', border: '1px solid #ccc' }}
+                                            >
+                                                <option value="">Select Difficulty</option>
+                                                <option value="Beginner">Beginner</option>
+                                                <option value="Intermediate">Intermediate</option>
+                                                <option value="Advanced">Advanced</option>
+                                                <option value="All Levels">All Levels</option>
+                                            </select>
+                                            <input
+                                                name="tags"
+                                                value={editFormData.tags}
+                                                onChange={handleEditFormChange}
+                                                placeholder="Tags (comma separated)"
+                                                style={{ padding: '8px', fontSize: '1rem', borderRadius: '4px', border: '1px solid #ccc' }}
+                                            />
+                                            <div>
+                                                <button
+                                                    type="submit"
+                                                    style={{ padding: '8px 14px', backgroundColor: '#4caf50', color: 'white', border: 'none', borderRadius: '4px', marginRight: '8px' }}
+                                                >
+                                                    Save Changes
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    onClick={cancelEditCourse}
+                                                    style={{ padding: '8px 14px', backgroundColor: '#777', color: 'white', border: 'none', borderRadius: '4px' }}
+                                                >
+                                                    Cancel
+                                                </button>
+                                            </div>
+                                        </form>
+                                    ) : (
+                                        // Display Course Details
+                                        <>
+                                            <h4>{selectedCourse.title}</h4>
+                                            <p><strong>Description:</strong> {selectedCourse.description}</p>
+                                            <p><strong>Difficulty:</strong> {selectedCourse.difficulty || "N/A"}</p>
+                                            <p><strong>Tags:</strong> {selectedCourse.tags ? selectedCourse.tags.join(', ') : "N/A"}</p>
+                                            <p><strong>Created:</strong> {new Date(selectedCourse.createdAt || Date.now()).toLocaleDateString()}</p>
+                                            <button onClick={() => startEditCourse(selectedCourse)} style={{ marginRight: '10px', backgroundColor: '#ffdd57', padding: '8px 14px', border: 'none', borderRadius: '4px' }}>Edit</button>
+                                            <button onClick={() => handleDeleteCourse(selectedCourse._id)} style={{ backgroundColor: '#f76c6c', color: 'white', padding: '8px 14px', border: 'none', borderRadius: '4px' }}>Delete</button>
+                                        </>
+                                    )}
                                 </div>
                             ) : <p>Course not found.</p>;
                         })()}
