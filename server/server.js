@@ -1,4 +1,5 @@
 // server/server.js
+require('dotenv').config(); // Load environment variables from .env file
 const express = require('express');
 const mongoose = require('mongoose'); // Using Mongoose for MongoDB
 const app = express();
@@ -10,9 +11,8 @@ const authMiddleware = require('./middleware/authMiddleware'); // Import the mid
 // Middleware to parse JSON bodies
 app.use(express.json());
 
-const JWT_SECRET = 'abc'; // IMPORTANT: Use an environment variable for this in production!
-
-const mongoURI = 'mongodb+srv://arishit:abc@companygroww.4trxhfw.mongodb.net/'; // Change if needed
+const JWT_SECRET = process.env.JWT_SECRET; 
+const mongoURI = process.env.MONGO_URI // Change if needed
 
 
 mongoose.connect(mongoURI, { useNewUrlParser: true, useUnifiedTopology: true })
@@ -25,7 +25,7 @@ const userSchema = new mongoose.Schema({
     name: { type: String, required: true },
     email: { type: String, required: true, unique: true },
     password: { type: String, required: true },
-    skills: [{ type: String }],
+    skills: [{ type: String, default: 'All Levels'}],
     role: {
         type: String,
         enum: ['employee', 'manager', 'admin'],
@@ -35,16 +35,18 @@ const userSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Course'
     }],
-    completedCourses: [{ // Add this field
+    completedCourses: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Course'
-    }]
+    }],
+    tokens: {type : Number,default:0}
 });
 const User = mongoose.model('User', userSchema);
 
 const courseSchema = new mongoose.Schema({
     title: { type: String, required: true },
     description: { type: String, required: true },
+    skills: [{ type: String }],
     tags: [{ type: String }], // Optional tags for categorization
     difficulty: {
         type: String,
@@ -127,12 +129,23 @@ app.post('/api/courses/:courseId/enroll', authMiddleware, async (req, res) => {
             return res.status(400).json({ msg: 'User already enrolled in this course' });
         }
 
-        user.enrolledCourses.push(courseId);
-        await user.save();
-        res.json({ msg: 'Successfully enrolled in course', enrolledCourses: user.enrolledCourses });
+        // Use findByIdAndUpdate to avoid versioning conflicts
+        const updatedUser = await User.findByIdAndUpdate(
+            userId,
+            { 
+                $push: { enrolledCourses: courseId },
+                $inc: { tokens: 10 }
+            },
+            { new: true, runValidators: true }
+        );
+
+        res.json({ 
+            msg: 'Successfully enrolled in course', 
+            enrolledCourses: updatedUser.enrolledCourses 
+        });
     } catch (err) {
-        console.error(err.message);
-        res.status(500).send('Server Error');
+        console.error('Enrollment error:', err.message);
+        res.status(500).json({ msg: 'Server Error during enrollment' });
     }
 });
 
@@ -454,6 +467,112 @@ app.get('/api/users/me/projects', authMiddleware, async (req, res) => {
         res.status(500).send('Server Error');
     }
 });
+// Edit a course (Admin/Manager only)
+app.put('/api/courses/:courseId', authMiddleware, async (req, res) => {
+    if (req.user.role !== 'admin' && req.user.role !== 'manager') {
+        return res.status(403).json({ msg: 'Access denied: Admin or Manager role required.' });
+    }
+    try {
+        const { title, description, tags, difficulty } = req.body;
+        const updates = {};
+        if (title) updates.title = title;
+        if (description) updates.description = description;
+        if (tags) updates.tags = tags;
+        if (difficulty) updates.difficulty = difficulty;
+
+        let course = await Course.findById(req.params.courseId);
+        if (!course) {
+            return res.status(404).json({ msg: 'Course not found' });
+        }
+
+        course = await Course.findByIdAndUpdate(req.params.courseId, { $set: updates }, { new: true, runValidators: true });
+        res.json(course);
+    } catch (err) {
+        console.error(err.message);
+        if (err.kind === 'ObjectId') {
+            return res.status(404).json({ msg: 'Course not found' });
+        }
+        res.status(500).send('Server Error');
+    }
+});
+
+// Delete a course (Admin/Manager only)
+app.delete('/api/courses/:courseId', authMiddleware, async (req, res) => {
+    if (req.user.role !== 'admin' && req.user.role !== 'manager') {
+        return res.status(403).json({ msg: 'Access denied: Admin or Manager role required.' });
+    }
+    try {
+        const course = await Course.findById(req.params.courseId);
+        if (!course) {
+            return res.status(404).json({ msg: 'Course not found' });
+        }
+        await course.deleteOne();
+        res.json({ msg: 'Course deleted successfully' });
+    } catch (err) {
+        console.error(err.message);
+        if (err.kind === 'ObjectId') {
+            return res.status(404).json({ msg: 'Course not found' });
+        }
+        res.status(500).send('Server Error');
+    }
+});
+// Edit a user (Admin/Manager only)
+app.put('/api/users/:userId', authMiddleware, async (req, res) => {
+    if (req.user.role !== 'admin' && req.user.role !== 'manager') {
+        return res.status(403).json({ msg: 'Access denied: Admin or Manager role required.' });
+    }
+    try {
+        const { name, skills, role } = req.body;
+        const updates = {};
+        if (name) updates.name = name;
+        if (skills) updates.skills = skills;
+        if (role) {
+            // Optional: restrict roles allowed to be assigned here if needed
+            updates.role = role;
+        }
+
+        let user = await User.findById(req.params.userId);
+        if (!user) {
+            return res.status(404).json({ msg: 'User not found' });
+        }
+
+        user = await User.findByIdAndUpdate(req.params.userId, { $set: updates }, { new: true, runValidators: true }).select('-password');
+        res.json(user);
+    } catch (err) {
+        console.error(err.message);
+        if (err.kind === 'ObjectId') {
+            return res.status(404).json({ msg: 'User not found' });
+        }
+        res.status(500).send('Server Error');
+    }
+});
+
+// Delete a user (Admin/Manager only)
+app.delete('/api/users/:userId', authMiddleware, async (req, res) => {
+    if (req.user.role !== 'admin' && req.user.role !== 'manager') {
+        return res.status(403).json({ msg: 'Access denied: Admin or Manager role required.' });
+    }
+    try {
+        const user = await User.findById(req.params.userId);
+        if (!user) {
+            return res.status(404).json({ msg: 'User not found' });
+        }
+        await user.deleteOne();
+        res.json({ msg: 'User deleted successfully' });
+    } catch (err) {
+        console.error(err.message);
+        if (err.kind === 'ObjectId') {
+            return res.status(404).json({ msg: 'User not found' });
+        }
+        res.status(500).send('Server Error');
+    }
+});
+
+
+
+
+
+
 
 // Start server
 app.listen(port, () => {

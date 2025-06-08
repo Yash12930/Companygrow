@@ -1,83 +1,490 @@
+/* AdminDashboard.css */
 .admin-dashboard {
-    padding: 20px;
-    font-family: Arial, sans-serif;
+    min-height: 100vh;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: 2rem;
+    font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    position: relative;
 }
 
-.admin-dashboard h1 {
-    color: #333;
-    border-bottom: 2px solid #eee;
-    padding-bottom: 10px;
-    margin-bottom: 20px;
+.admin-dashboard::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="50" cy="50" r="0.5" fill="white" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+    pointer-events: none;
+}
+
+.admin-dashboard > * {
+    position: relative;
+    z-index: 1;
+}
+
+/* Navigation */
+.admin-dashboard nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    padding: 1rem 2rem;
+    border-radius: 15px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .admin-dashboard nav ul {
     list-style-type: none;
     padding: 0;
-    margin-bottom: 30px;
     display: flex;
     gap: 15px;
-    flex-wrap: wrap;
+    margin: 0;
 }
 
 .admin-dashboard nav ul li a {
     text-decoration: none;
-    background-color: #007bff;
-    color: white;
-    padding: 10px 15px;
-    border-radius: 5px;
-    transition: background-color 0.3s ease;
+    color: #667eea;
+    font-weight: 600;
+    padding: 0.75rem 1.25rem;
+    border-radius: 12px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+.admin-dashboard nav ul li a::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(102, 126, 234, 0.2), transparent);
+    transition: left 0.5s;
+}
+
+.admin-dashboard nav ul li a:hover::before {
+    left: 100%;
 }
 
 .admin-dashboard nav ul li a:hover {
-    background-color: #0056b3;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    transform: translateY(-2px);
 }
 
+.admin-dashboard nav button {
+    background: rgba(239, 68, 68, 0.9);
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+    font-weight: 600;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
+}
+
+.admin-dashboard nav button:hover {
+    background: rgba(220, 38, 38, 0.9);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(239, 68, 68, 0.4);
+}
+
+/* Header */
+.admin-dashboard h1 {
+    font-size: 3rem;
+    font-weight: 700;
+    color: white;
+    margin-bottom: 0.5rem;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    background: linear-gradient(45deg, #fff, #f0f0f0);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    text-align: center;
+}
+
+.welcome-message {
+    font-size: 1.25rem;
+    color: rgba(255, 255, 255, 0.9);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+    margin-bottom: 2rem;
+    text-align: center;
+}
+
+/* Dashboard Sections */
 .dashboard-section {
-    background-color: #f9f9f9;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    padding: 20px;
-    margin-bottom: 20px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    border-radius: 20px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    transition: transform 0.3s ease;
+}
+
+.dashboard-section:hover {
+    transform: translateY(-5px);
 }
 
 .dashboard-section h2 {
     margin-top: 0;
-    color: #555;
-    border-bottom: 1px solid #eee;
-    padding-bottom: 8px;
-    margin-bottom: 15px;
+    color: #667eea;
+    font-size: 1.75rem;
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+    background: linear-gradient(45deg, #667eea, #764ba2);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    position: relative;
 }
 
-.loading-message, .error-message {
-    padding: 10px;
-    margin: 10px 0;
-    border-radius: 5px;
+.dashboard-section h2::after {
+    content: '';
+    position: absolute;
+    bottom: -0.5rem;
+    left: 0;
+    width: 60px;
+    height: 3px;
+    background: linear-gradient(45deg, #667eea, #764ba2);
+    border-radius: 2px;
+}
+
+/* Placeholder sections */
+.placeholder-section {
+    background: rgba(255, 255, 255, 0.7);
+    border: 2px dashed rgba(102, 126, 234, 0.3);
     text-align: center;
 }
 
+.placeholder-section h2 {
+    color: #8e9aaf;
+}
+
+.placeholder-section p {
+    color: #8e9aaf;
+    font-style: italic;
+    font-size: 1.1rem;
+}
+
+/* Form Elements */
+.dropdown-container {
+    margin-top: 1.5rem;
+}
+
+.dropdown-container label {
+    display: block;
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 0.5rem;
+}
+
+.dropdown-container select {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border-radius: 12px;
+    border: 2px solid #e5e7eb;
+    font-size: 1rem;
+    background: white;
+    transition: all 0.3s ease;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg fill='none' stroke='%23667eea' stroke-width='2' viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    background-size: 18px 18px;
+    padding-right: 3rem;
+}
+
+.dropdown-container select:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+    outline: none;
+}
+
+/* Course Details */
+.course-details {
+    margin-top: 1.5rem;
+    padding: 1.5rem;
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.05), rgba(118, 75, 162, 0.05));
+    border: 1px solid rgba(102, 126, 234, 0.2);
+    border-radius: 15px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease;
+}
+
+.course-details:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+}
+
+.course-details h4 {
+    margin-top: 0;
+    color: #667eea;
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+}
+
+.course-details p {
+    margin: 0.75rem 0;
+    color: #4b5563;
+    line-height: 1.6;
+}
+
+.course-details strong {
+    color: #374151;
+}
+
+/* Form styling for edit mode */
+.course-details form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.course-details form input,
+.course-details form textarea,
+.course-details form select {
+    padding: 0.75rem;
+    font-size: 1rem;
+    border-radius: 12px;
+    border: 2px solid #e5e7eb;
+    transition: all 0.3s ease;
+    font-family: inherit;
+}
+
+.course-details form input:focus,
+.course-details form textarea:focus,
+.course-details form select:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+    outline: none;
+}
+
+.course-details form textarea {
+    resize: vertical;
+    min-height: 100px;
+}
+
+/* Buttons */
+.course-details button,
+.admin-dashboard button:not(nav button) {
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+    font-size: 0.95rem;
+}
+
+.course-details button::before,
+.admin-dashboard button:not(nav button)::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s;
+}
+
+.course-details button:hover::before,
+.admin-dashboard button:not(nav button):hover::before {
+    left: 100%;
+}
+
+/* Edit button */
+.course-details button[style*="background-color: #ffdd57"] {
+    background: linear-gradient(135deg, #fbbf24, #f59e0b) !important;
+    color: white;
+    box-shadow: 0 4px 15px rgba(251, 191, 36, 0.3);
+}
+
+.course-details button[style*="background-color: #ffdd57"]:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(251, 191, 36, 0.4);
+}
+
+/* Delete button */
+.course-details button[style*="background-color: #f76c6c"] {
+    background: linear-gradient(135deg, #ef4444, #dc2626) !important;
+    color: white;
+    box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
+}
+
+.course-details button[style*="background-color: #f76c6c"]:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(239, 68, 68, 0.4);
+}
+
+/* Save button */
+.course-details button[style*="background-color: #4caf50"] {
+    background: linear-gradient(135deg, #10b981, #059669) !important;
+    color: white;
+    box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+}
+
+.course-details button[style*="background-color: #4caf50"]:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+}
+
+/* Cancel button */
+.course-details button[style*="background-color: #777"] {
+    background: linear-gradient(135deg, #6b7280, #4b5563) !important;
+    color: white;
+    box-shadow: 0 4px 15px rgba(107, 114, 128, 0.3);
+}
+
+.course-details button[style*="background-color: #777"]:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(107, 114, 128, 0.4);
+}
+
+/* Loading and Error Messages */
+.loading-message, .error-message {
+    padding: 1rem 1.5rem;
+    border-radius: 12px;
+    text-align: center;
+    font-weight: 600;
+    font-size: 1rem;
+    margin: 1rem 0;
+}
+
 .loading-message {
-    background-color: #eef;
-    border: 1px solid #cce;
-    color: #337;
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(37, 99, 235, 0.1));
+    color: #1e40af;
+    border: 1px solid rgba(59, 130, 246, 0.2);
 }
 
 .error-message {
-    background-color: #fee;
-    border: 1px solid #ecc;
-    color: #a33;
+    background: linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(220, 38, 38, 0.1));
+    color: #dc2626;
+    border: 1px solid rgba(239, 68, 68, 0.2);
 }
 
-.admin-dashboard button {
-    padding: 10px 15px;
-    background-color: #dc3545;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
+/* Employee Grid */
+.employee-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.5rem;
+    margin-top: 1rem;
 }
 
-.admin-dashboard button:hover {
-    background-color: #c82333;
+.employee-card {
+    background: white;
+    border: 1px solid rgba(102, 126, 234, 0.2);
+    border-radius: 15px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
 }
+
+.employee-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #667eea, #764ba2);
+}
+
+.employee-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.2);
+}
+
+.employee-card h4 {
+    margin: 0 0 1rem 0;
+    color: #667eea;
+    font-size: 1.25rem;
+    font-weight: 700;
+}
+
+.employee-card p {
+    margin: 0.5rem 0;
+    color: #4b5563;
+    line-height: 1.5;
+}
+
+.employee-actions {
+    margin-top: 1rem;
+    display: flex;
+    gap: 0.75rem;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .admin-dashboard {
+        padding: 1rem;
+    }
+    
+    .admin-dashboard h1 {
+        font-size: 2rem;
+    }
+    
+    .welcome-message {
+        font-size: 1.1rem;
+    }
+    
+    .admin-dashboard nav {
+        flex-direction: column;
+        gap: 1rem;
+        padding: 1.5rem;
+    }
+    
+    .admin-dashboard nav ul {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .dashboard-section {
+        padding: 1.5rem;
+    }
+    
+    .employee-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 480px) {
+    .admin-dashboard h1 {
+        font-size: 1.75rem;
+    }
+    
+    .dashboard-section {
+        padding: 1rem;
+    }
+    
+    .course-details {
+        padding: 1rem;
+    }
+    
+    .course-details form {
+        gap: 0.75rem;
+    }
+    
+    .employee-actions {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+}
+
+

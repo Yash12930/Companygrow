@@ -1,0 +1,325 @@
+/* ProjectManagement.css */
+.project-container {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: 2rem;
+    font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    position: relative;
+}
+
+.project-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="50" cy="50" r="0.5" fill="white" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+    pointer-events: none;
+}
+
+.project-container > * {
+    position: relative;
+    z-index: 1;
+}
+
+.project-container h1 {
+    font-size: 3rem;
+    font-weight: 700;
+    color: white;
+    margin-bottom: 0.5rem;
+    text-align: center;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    background: linear-gradient(45deg, #fff, #f0f0f0);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.project-container h2 {
+    font-size: 1.75rem;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.9);
+    margin: 3rem 0 1.5rem;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+/* Form Styling */
+.project-container form {
+    max-width: 600px;
+    margin: 0 auto 3rem auto;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    padding: 2rem;
+    border-radius: 20px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.project-container input,
+.project-container select {
+    padding: 1rem;
+    border-radius: 12px;
+    border: 2px solid rgba(102, 126, 234, 0.2);
+    font-size: 1rem;
+    background: rgba(255, 255, 255, 0.9);
+    transition: all 0.3s ease;
+    outline: none;
+}
+
+.project-container input:focus,
+.project-container select:focus {
+    border-color: #667eea;
+    background: white;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    transform: translateY(-1px);
+}
+
+.project-container input::placeholder {
+    color: #9ca3af;
+}
+
+.project-container select {
+    min-height: 120px;
+    resize: vertical;
+}
+
+.project-container select option {
+    padding: 0.5rem;
+    background: white;
+    color: #374151;
+}
+
+.project-container select option:checked {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+}
+
+.project-container button {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    border: none;
+    padding: 1rem 2rem;
+    font-size: 1.1rem;
+    font-weight: 600;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    position: relative;
+    overflow: hidden;
+}
+
+.project-container button::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s;
+}
+
+.project-container button:hover::before {
+    left: 100%;
+}
+
+.project-container button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+}
+
+.project-container button:active {
+    transform: translateY(0);
+}
+
+/* Error Styling */
+.project-container .error {
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    color: #fecaca;
+    padding: 1rem 1.5rem;
+    border-radius: 12px;
+    text-align: center;
+    font-weight: 500;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 4px 20px rgba(239, 68, 68, 0.2);
+    margin: 1rem auto;
+    max-width: 600px;
+    animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Loading Message */
+.loading-message {
+    background: rgba(59, 130, 246, 0.1);
+    border: 1px solid rgba(59, 130, 246, 0.3);
+    color: #bfdbfe;
+    padding: 2rem;
+    border-radius: 12px;
+    text-align: center;
+    font-weight: 500;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 4px 20px rgba(59, 130, 246, 0.2);
+    margin: 2rem auto;
+    max-width: 400px;
+}
+
+.loading-message::after {
+    content: '';
+    display: inline-block;
+    width: 1rem;
+    height: 1rem;
+    margin-left: 0.5rem;
+    border: 2px solid rgba(191, 219, 254, 0.3);
+    border-top: 2px solid #bfdbfe;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Project List Styling */
+.project-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    max-width: 1000px;
+    margin: 0 auto;
+    display: grid;
+    gap: 1.5rem;
+}
+
+.project-list li {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 20px;
+    padding: 2rem;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+.project-list li::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #667eea, #764ba2);
+    transform: scaleX(0);
+    transition: transform 0.3s ease;
+}
+
+.project-list li:hover::before {
+    transform: scaleX(1);
+}
+
+.project-list li:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 16px 48px rgba(0, 0, 0, 0.15);
+}
+
+.project-list b {
+    color: #1f2937;
+    font-size: 1.25rem;
+    font-weight: 600;
+    display: block;
+    margin-bottom: 0.5rem;
+    background: linear-gradient(45deg, #667eea, #764ba2);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.project-info {
+    color: #6b7280;
+    line-height: 1.6;
+    margin: 0.5rem 0;
+}
+
+.project-info strong {
+    color: #374151;
+    font-weight: 600;
+}
+
+.skills-tag {
+    display: inline-block;
+    background: rgba(102, 126, 234, 0.1);
+    color: #667eea;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.875rem;
+    margin: 0.25rem 0.25rem 0.25rem 0;
+    border: 1px solid rgba(102, 126, 234, 0.2);
+}
+
+.employee-tag {
+    display: inline-block;
+    background: rgba(118, 75, 162, 0.1);
+    color: #764ba2;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.875rem;
+    margin: 0.25rem 0.25rem 0.25rem 0;
+    border: 1px solid rgba(118, 75, 162, 0.2);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .project-container {
+        padding: 1rem;
+    }
+    
+    .project-container h1 {
+        font-size: 2rem;
+    }
+    
+    .project-container form {
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    
+    .project-list li {
+        padding: 1.5rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .project-container h1 {
+        font-size: 1.75rem;
+    }
+    
+    .project-container form {
+        padding: 1rem;
+    }
+    
+    .project-container input,
+    .project-container select {
+        padding: 0.875rem;
+    }
+    
+    .project-list li {
+        padding: 1.25rem;
+    }
+}
