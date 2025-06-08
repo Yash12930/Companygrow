@@ -1,0 +1,233 @@
+.employee-dashboard {
+    padding: 20px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    background-color: #f4f7f6;
+    min-height: 100vh;
+}
+
+.dashboard-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #ffffff;
+    padding: 12px 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    margin-bottom: 25px;
+}
+
+.dashboard-nav a {
+    text-decoration: none;
+    color: #007bff;
+    font-weight: 500;
+    padding: 8px 12px;
+    border-radius: 4px;
+    transition: background-color 0.2s ease-in-out;
+}
+
+.dashboard-nav a:hover {
+    background-color: #e9ecef;
+}
+
+.logout-button {
+    background-color: #6c757d; /* A more neutral logout color */
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.95em;
+    font-weight: 500;
+    transition: background-color 0.2s ease-in-out;
+}
+
+.logout-button:hover {
+    background-color: #5a6268;
+}
+
+.employee-dashboard h1 {
+    color: #2c3e50;
+    font-size: 1.8em;
+    margin-bottom: 8px;
+}
+
+.welcome-message {
+    font-size: 1.1em;
+    color: #555;
+    margin-bottom: 25px;
+}
+
+.dashboard-section-card {
+    background-color: #ffffff;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 25px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.dashboard-section-card h2 {
+    color: #34495e;
+    font-size: 1.4em;
+    margin-top: 0;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #ecf0f1;
+    margin-bottom: 20px;
+}
+
+/* Course Filters Styling */
+.course-filters {
+    background-color: #fdfdfd;
+    padding: 15px;
+    margin-bottom: 20px;
+    border-radius: 6px;
+    border: 1px solid #e7e7e7;
+}
+
+.course-filters h4 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    color: #333;
+    font-size: 1.1em;
+}
+
+.course-filters label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: #555;
+    font-size: 0.9em;
+}
+
+.filter-buttons-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 15px;
+}
+
+.filter-button {
+    padding: 6px 12px;
+    cursor: pointer;
+    background-color: #f0f0f0;
+    border: 1px solid #ccc;
+    border-radius: 15px; /* Pill shape */
+    font-size: 0.85em;
+    transition: background-color 0.2s, border-color 0.2s, color 0.2s;
+}
+
+.filter-button.active {
+    background-color: #007bff;
+    color: white;
+    border-color: #007bff;
+}
+
+.filter-button:not(.active):hover {
+    background-color: #e0e0e0;
+    border-color: #bbb;
+}
+
+.filter-row {
+    display: flex;
+    gap: 20px; /* Space between difficulty and search */
+    margin-bottom: 15px;
+    flex-wrap: wrap; /* Allow wrapping on smaller screens */
+}
+
+.filter-group {
+    flex: 1; /* Allow groups to take available space */
+    min-width: 200px; /* Minimum width before wrapping */
+}
+
+.filter-select,
+.filter-input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+    font-size: 0.9em;
+}
+
+.clear-filters-button {
+    padding: 8px 15px;
+    background-color: #6c757d;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9em;
+    transition: background-color 0.2s;
+}
+
+.clear-filters-button:hover {
+    background-color: #5a6268;
+}
+
+/* Project List Styling */
+.project-list {
+    list-style-type: none;
+    padding: 0;
+}
+
+.project-item {
+    background-color: #fdfdfd;
+    border: 1px solid #e9ecef;
+    padding: 15px;
+    margin-bottom: 12px;
+    border-radius: 6px;
+    transition: box-shadow 0.2s ease-in-out, transform 0.2s ease-in-out;
+}
+
+.project-item:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    transform: translateY(-2px);
+}
+
+.project-item h3 {
+    margin-top: 0;
+    margin-bottom: 8px;
+    color: #0056b3;
+    font-size: 1.15em;
+}
+
+.project-description {
+    font-size: 0.95em;
+    color: #555;
+    margin-bottom: 12px;
+    line-height: 1.5;
+}
+
+.project-details {
+    font-size: 0.9em;
+    color: #777;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.project-details span strong {
+    color: #444;
+}
+
+
+/* Common loading/empty state message styling */
+.loading-message,
+.empty-state-message {
+    padding: 15px;
+    margin: 20px 0;
+    border-radius: 4px;
+    text-align: center;
+    font-size: 1em;
+    color: #555;
+}
+
+.loading-message {
+    background-color: #e9ecef;
+    border: 1px solid #ced4da;
+}
+
+.empty-state-message {
+    background-color: #f8f9fa;
+    border: 1px solid #dee2e6;
+}

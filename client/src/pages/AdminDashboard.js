@@ -13,70 +13,114 @@ import axios from 'axios';
 import './AdminDashboard.css'; // Import the CSS file
 
 function AdminDashboard() {
-    const { user, logout } = useAuth();
+    const { user, logout, token: contextToken } = useAuth(); // Rename token from context to avoid conflict
     const navigate = useNavigate();
 
-    // const [employees, setEmployees] = useState([]);
-    // const [courses, setCourses] = useState([]);
-    // const [isLoadingEmployees, setIsLoadingEmployees] = useState(true);
-    // const [isLoadingCourses, setIsLoadingCourses] = useState(true);
-    const [error, setError] = useState(''); // For general errors on this page
+    const [totalUsers, setTotalUsers] = useState(0);
+    const [totalCourses, setTotalCourses] = useState(0);
+    const [totalProjects, setTotalProjects] = useState(0);
+    const [isLoadingStats, setIsLoadingStats] = useState(true);
+    const [error, setError] = useState('');
+
+    useEffect(() => {
+        const apiToken = contextToken || localStorage.getItem("token"); // Use context token or fallback to localStorage
+
+        const fetchStats = async () => {
+            if (!apiToken) { // Check if token is available from either source
+                setIsLoadingStats(false);
+                setError("Authentication token not found. Please log in.");
+                return;
+            }
+
+            setIsLoadingStats(true);
+            setError('');
+            try {
+                // Fetch total users
+                const usersResponse = await axios.get('/api/users', {
+                    headers: { Authorization: `Bearer ${apiToken}` }
+                });
+                setTotalUsers(usersResponse.data.length);
+
+                // Fetch total courses
+                const coursesResponse = await axios.get('/api/courses', {
+                    headers: { Authorization: `Bearer ${apiToken}` }
+                });
+                setTotalCourses(coursesResponse.data.length);
+
+                // Fetch total projects
+                const projectsResponse = await axios.get('/api/projects', {
+                    headers: { Authorization: `Bearer ${apiToken}` }
+                });
+                setTotalProjects(projectsResponse.data.length);
+
+            } catch (err) {
+                console.error("Error fetching dashboard stats:", err);
+                let errorMessage = 'Failed to load dashboard statistics. Please try again later.';
+                if (err.response) {
+                    if (err.response.status === 401 || err.response.status === 403) {
+                        errorMessage = 'Session expired or unauthorized. Please log in again.';
+                        // Optional: redirect to login after a delay
+                        // setTimeout(() => navigate('/login'), 3000);
+                    } else if (err.response.data && err.response.data.msg) {
+                        errorMessage = err.response.data.msg;
+                    }
+                }
+                setError(errorMessage);
+            } finally {
+                setIsLoadingStats(false);
+            }
+        };
+
+        fetchStats();
+
+    }, [contextToken, navigate]); // Depend on contextToken, navigate
 
     const handleLogout = () => {
-        logout();
+        logout(); // This should also clear localStorage token if AuthContext handles it
         navigate('/login');
     };
 
     // Dummy data/placeholders for sections if not fetching data directly on this page
     // If these sections are handled by separate pages, this dashboard becomes simpler.
 
+    if (!user && !localStorage.getItem("token")) { // Redirect if no user and no token at all
+        navigate('/login');
+        return null; // Render nothing while redirecting
+    }
+    
     return (
         <div className="admin-dashboard">
-            <nav>
+            <nav className="dashboard-nav"> {/* Assuming similar nav as EmployeeDashboard */}
                 <Link to="/profile">My Profile</Link>
+                <button onClick={handleLogout} className="logout-button">Logout</button>
             </nav>
             <h1>Admin Dashboard</h1>
-            <p>Welcome, {user?.name} (Admin)!</p>
+            <p className="welcome-message">Welcome, {user?.name || 'Admin'}!</p> {/* Fallback name */}
             
-            <nav>
-                <ul>
+            {error && <p className="error-message" style={{color: 'red', backgroundColor: '#ffebee', border: '1px solid red', padding: '10px', borderRadius: '4px'}}>{error}</p>}
+
+            <div className="dashboard-section-card"> {/* Using class from EmployeeDashboard.css for consistency */}
+                <h2>Quick Overview</h2>
+                {isLoadingStats ? (
+                    <p className="loading-message">Loading statistics...</p>
+                ) : (
+                    <>
+                        <p>Total Users: {totalUsers}</p>
+                        <p>Total Courses: {totalCourses}</p>
+                        <p>Total Projects: {totalProjects}</p>
+                    </>
+                )}
+            </div>
+
+            <div className="dashboard-section-card">
+                <h2>Management Links</h2>
+                <ul className="management-links">
                     <li><Link to="/manage-courses">Manage Courses</Link></li>
                     <li><Link to="/manage-employees">Manage Employees</Link></li>
                     <li><Link to="/project-management">Manage Projects</Link></li>
                 </ul>
-            </nav>
-
-            {error && <p className="error-message">{error}</p>}
-
-            <div className="dashboard-section">
-                <h2>Quick Overview</h2>
-                <p>This area can show summary statistics or quick actions.</p>
-                {/* Example:
-                <p>Total Users: {employees.length}</p>
-                <p>Total Courses: {courses.length}</p> 
-                */}
             </div>
-
-            {/* 
-                If you prefer to show lists directly on the dashboard instead of linking to separate pages,
-                you would uncomment and integrate the fetching logic and components here.
-                For example:
-            */}
-            {/*
-            <div className="dashboard-section">
-                <h2>Recent Employees</h2>
-                {isLoadingEmployees ? <p className="loading-message">Loading employees...</p> : <EmployeeList employees={employees.slice(0, 5)} />} 
-                <Link to="/manage-employees">View All Employees</Link>
-            </div>
-
-            <div className="dashboard-section">
-                <h2>Recent Courses</h2>
-                {isLoadingCourses ? <p className="loading-message">Loading courses...</p> : <CourseList courses={courses.slice(0, 5)} />}
-                <Link to="/manage-courses">View All Courses</Link>
-            </div>
-            */}
-            
-            <button onClick={handleLogout} style={{ marginTop: '20px' }}>Logout</button>
+            {/* Add more sections as needed */}
         </div>
     );
 }

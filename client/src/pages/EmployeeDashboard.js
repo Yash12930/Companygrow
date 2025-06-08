@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import CourseList from '../components/CourseList';
 import { Link } from 'react-router-dom';
+import './EmployeeDashboard.css'; // Import the CSS file
 
 const predefinedSkills = [
     "JavaScript", "Python", "Java", "SQL", "HTML", "CSS", "React.js", "Node.js",
@@ -21,16 +22,15 @@ function EmployeeDashboard() {
     const [allCourses, setAllCourses] = useState([]);
     const [myEnrolledCourses, setMyEnrolledCourses] = useState([]);
     const [myEnrolledCourseIds, setMyEnrolledCourseIds] = useState([]);
-    const [myCompletedCourses, setMyCompletedCourses] = useState([]); // State for completed courses
-    const [myCompletedCourseIds, setMyCompletedCourseIds] = useState([]); // State for completed course IDs
+    const [myCompletedCourses, setMyCompletedCourses] = useState([]);
+    const [myCompletedCourseIds, setMyCompletedCourseIds] = useState([]);
     const [myProjects, setMyProjects] = useState([]);
 
     const [loadingAllCourses, setLoadingAllCourses] = useState(true);
     const [loadingMyCourses, setLoadingMyCourses] = useState(true);
-    const [loadingMyCompleted, setLoadingMyCompleted] = useState(true); // Loading state for completed
+    const [loadingMyCompleted, setLoadingMyCompleted] = useState(true);
     const [loadingProjects, setLoadingProjects] = useState(true);
 
-    // Filters State
     const [selectedFilterSkills, setSelectedFilterSkills] = useState([]);
     const [selectedDifficulty, setSelectedDifficulty] = useState('All');
     const [searchTerm, setSearchTerm] = useState('');
@@ -54,7 +54,7 @@ function EmployeeDashboard() {
     const fetchMyEnrolledCourses = async () => {
         setLoadingMyCourses(true);
         try {
-            const response = await axios.get('/api/users/me/enrolled-courses'); 
+            const response = await axios.get('/api/users/me/enrolled-courses', { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } }); 
             setMyEnrolledCourses(response.data);
             setMyEnrolledCourseIds(response.data.map(course => course._id));
         } catch (error) {
@@ -64,10 +64,10 @@ function EmployeeDashboard() {
         }
     };
 
-    const fetchMyCompletedCourses = async () => { // New function
+    const fetchMyCompletedCourses = async () => { 
         setLoadingMyCompleted(true);
         try {
-            const response = await axios.get('/api/users/me/completed-courses');
+            const response = await axios.get('/api/users/me/completed-courses', { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } });
             setMyCompletedCourses(response.data);
             setMyCompletedCourseIds(response.data.map(course => course._id));
         } catch (error) {
@@ -78,20 +78,22 @@ function EmployeeDashboard() {
     };
 
     const fetchMyProjects = async () => {
+        setLoadingProjects(true); // Ensure loading state is set
         try {
             const res = await axios.get("/api/users/me/projects", { headers: { Authorization: `Bearer ${localStorage.getItem("token")}` } });
             setMyProjects(res.data);
         } catch (err) {
-            // handle error
+            console.error("Failed to fetch my projects", err); // Add error logging
         } finally {
             setLoadingProjects(false);
         }
     };
 
     useEffect(() => {
-        if (user) {
+        const token = localStorage.getItem("token"); // Get token once
+        if (user && token) { // Ensure user and token exist
             fetchMyEnrolledCourses();
-            fetchMyCompletedCourses(); // Fetch completed courses on load
+            fetchMyCompletedCourses(); 
             fetchMyProjects();
         }
     }, [user]);
@@ -102,7 +104,7 @@ function EmployeeDashboard() {
         }
     }, [user, fetchAllCourses]);
 
-    const handleFilterSkillChange = (skill) => { /* ... no change ... */ 
+    const handleFilterSkillChange = (skill) => { 
         setSelectedFilterSkills(prevSkills =>
             prevSkills.includes(skill)
                 ? prevSkills.filter(s => s !== skill)
@@ -110,148 +112,138 @@ function EmployeeDashboard() {
         );
     };
     
-    const clearFilters = () => { /* ... no change ... */
+    const clearFilters = () => {
         setSelectedFilterSkills([]);
         setSelectedDifficulty('All');
         setSearchTerm('');
     };
 
-
     const handleCourseEnrolled = (enrolledCourseId) => {
-        fetchMyEnrolledCourses(); // Re-fetch to update "Enrolled" status across lists if needed
-        fetchMyCompletedCourses(); // Also ensure completion status is fresh
+        fetchMyEnrolledCourses(); 
+        fetchMyCompletedCourses(); 
     };
 
     const handleCourseCompleted = (completedCourseId) => {
-        fetchMyEnrolledCourses(); // To update the button state in "My Enrolled Courses" if displayed there
-        fetchMyCompletedCourses(); // To update the list of completed courses and button states
+        fetchMyEnrolledCourses(); 
+        fetchMyCompletedCourses(); 
     };
 
-    const handleLogout = () => { /* ... no change ... */
+    const handleLogout = () => { 
         logout();
         navigate('/login');
     };
     
     return (
-        <div>
-            <nav>
+        <div className="employee-dashboard">
+            <nav className="dashboard-nav">
                 <Link to="/profile">My Profile</Link>
+                <button onClick={handleLogout} className="logout-button">Logout</button>
             </nav>
             <h1>Employee Dashboard</h1>
-            <p>Welcome, {user?.name}!</p>
-            <button onClick={handleLogout}>Logout</button>
+            <p className="welcome-message">Welcome, {user?.name}!</p>
             
-            <hr style={{margin: "20px 0"}}/>
-
-            <section>
+            <section className="dashboard-section-card">
                 <h2>My Enrolled Courses</h2>
-                {loadingMyCourses ? <p>Loading your courses...</p> : 
+                {loadingMyCourses ? <p className="loading-message">Loading your courses...</p> : 
                     myEnrolledCourses.length > 0 ? 
                     <CourseList 
                         courses={myEnrolledCourses} 
-                        showEnrollButton={false} // Don't show enroll for "My Courses" list
-                        showCompleteButton={true}  // DO show complete button here
+                        showEnrollButton={false}
+                        showCompleteButton={true}
                         onCompleted={handleCourseCompleted}
                         completedCourseIds={myCompletedCourseIds}
-                        // enrolledCourseIds are implicitly all courses in this list
                         enrolledCourseIds={myEnrolledCourses.map(c => c._id)} 
                     /> : 
-                    <p>You are not enrolled in any courses yet.</p>
+                    <p className="empty-state-message">You are not enrolled in any courses yet.</p>
                 }
             </section>
 
-            <hr style={{margin: "20px 0"}}/>
-
-            <section>
+            <section className="dashboard-section-card">
                 <h2>My Completed Courses</h2>
-                {loadingMyCompleted ? <p>Loading completed courses...</p> :
+                {loadingMyCompleted ? <p className="loading-message">Loading completed courses...</p> :
                     myCompletedCourses.length > 0 ?
                     <CourseList 
                         courses={myCompletedCourses}
                         showEnrollButton={false}
-                        showCompleteButton={false} // No buttons needed for already completed
-                        completedCourseIds={myCompletedCourseIds} // To show "Completed!" status
+                        showCompleteButton={false}
+                        completedCourseIds={myCompletedCourseIds}
                     /> :
-                    <p>You have not completed any courses yet.</p>
+                    <p className="empty-state-message">You have not completed any courses yet.</p>
                 }
             </section>
 
-            <hr style={{margin: "20px 0"}}/>
-
-            <section>
+            <section className="dashboard-section-card">
                 <h2>Available Courses to Enroll</h2>
-                {/* Filter UI ... no change to its JSX structure */}
-                <div style={{ border: '1px solid #eee', padding: '15px', margin: '15px 0' }}>
+                <div className="course-filters">
                     <h4>Filter Courses</h4>
                     <div>
                         <label>By Skills: </label>
-                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '5px', marginBottom: '10px' }}>
+                        <div className="filter-buttons-group">
                             {predefinedSkills.map(skill => (
                                 <button 
                                     key={`filter-skill-${skill}`}
                                     onClick={() => handleFilterSkillChange(skill)}
-                                    style={{ 
-                                        padding: '5px 8px', 
-                                        cursor: 'pointer',
-                                        backgroundColor: selectedFilterSkills.includes(skill) ? 'lightblue' : 'white',
-                                        border: '1px solid #ccc'
-                                    }}
+                                    className={`filter-button ${selectedFilterSkills.includes(skill) ? 'active' : ''}`}
                                 >
                                     {skill}
                                 </button>
                             ))}
                         </div>
                     </div>
-                    <div>
-                        <label htmlFor="filterDifficulty">By Difficulty: </label>
-                        <select 
-                            id="filterDifficulty" 
-                            value={selectedDifficulty} 
-                            onChange={(e) => setSelectedDifficulty(e.target.value)}
-                            style={{ marginBottom: '10px', padding: '5px' }}
-                        >
-                            {difficultyLevels.map(level => (
-                                <option key={level} value={level}>{level}</option>
-                            ))}
-                        </select>
+                    <div className="filter-row">
+                        <div className="filter-group">
+                            <label htmlFor="filterDifficulty">By Difficulty: </label>
+                            <select 
+                                id="filterDifficulty" 
+                                value={selectedDifficulty} 
+                                onChange={(e) => setSelectedDifficulty(e.target.value)}
+                                className="filter-select"
+                            >
+                                {difficultyLevels.map(level => (
+                                    <option key={level} value={level}>{level}</option>
+                                ))}
+                            </select>
+                        </div>
+                        <div className="filter-group">
+                            <label htmlFor="filterSearch">Search Title/Description: </label>
+                            <input 
+                                type="text" 
+                                id="filterSearch"
+                                placeholder="Enter keywords..."
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                                className="filter-input"
+                            />
+                        </div>
                     </div>
-                    <div>
-                        <label htmlFor="filterSearch">Search Title/Description: </label>
-                        <input 
-                            type="text" 
-                            id="filterSearch"
-                            placeholder="Enter keywords..."
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                            style={{ marginBottom: '10px', padding: '5px', width: '200px' }}
-                        />
-                    </div>
-                    <button onClick={clearFilters} style={{ padding: '5px 10px'}}>Clear Filters</button>
+                    <button onClick={clearFilters} className="clear-filters-button">Clear Filters</button>
                 </div>
 
-                {loadingAllCourses ? <p>Loading courses...</p> : 
+                {loadingAllCourses ? <p className="loading-message">Loading courses...</p> : 
                     <CourseList 
                         courses={allCourses} 
                         showEnrollButton={true} 
                         onEnrolled={handleCourseEnrolled}
                         enrolledCourseIds={myEnrolledCourseIds}
-                        showCompleteButton={false} // Don't show complete for general browse list
-                        completedCourseIds={myCompletedCourseIds} // To correctly show "Enrolled" vs "Completed"
+                        showCompleteButton={false} 
+                        completedCourseIds={myCompletedCourseIds} 
                     />
                 }
             </section>
 
-            <hr style={{margin: "20px 0"}}/>
-            <section>
+            <section className="dashboard-section-card">
                 <h2>My Assigned Projects</h2>
-                {loadingProjects ? <p>Loading projects...</p> :
-                    myProjects.length === 0 ? <p>No projects assigned yet.</p> :
-                    <ul>
+                {loadingProjects ? <p className="loading-message">Loading projects...</p> :
+                    myProjects.length === 0 ? <p className="empty-state-message">No projects assigned yet.</p> :
+                    <ul className="project-list">
                         {myProjects.map(p => (
-                            <li key={p._id}>
-                                <b>{p.title}</b> - {p.description} <br />
-                                Skills: {p.requiredSkills.join(", ")} <br />
-                                Deadline: {p.deadline ? new Date(p.deadline).toLocaleDateString() : "N/A"}
+                            <li key={p._id} className="project-item">
+                                <h3>{p.title}</h3>
+                                <p className="project-description">{p.description}</p>
+                                <div className="project-details">
+                                    <span className="project-skill"><strong>Skills:</strong> {p.requiredSkills.join(", ")}</span>
+                                    <span className="project-deadline"><strong>Deadline:</strong> {p.deadline ? new Date(p.deadline).toLocaleDateString() : "N/A"}</span>
+                                </div>
                             </li>
                         ))}
                     </ul>
